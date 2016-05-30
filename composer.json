@@ -1,7 +1,7 @@
 {
     "name": "yeaha/owl-mvc",
     "description": "RESTFul Web Framework",
-    "keywords": ["framework", "mvc", "swoole", "restful", "orm", "datamapper"],
+    "keywords": ["mvc", "swoole", "restful"],
     "homepage": "https://github.com/yeaha/owl-mvc",
     "license": "MIT",
     "authors": [
@@ -18,7 +18,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Owl\\": "src/"
+            "Owl\\": "src/",
+            "Owl\\Context\\": "src/Context/",
+            "Owl\\Http\\": "src/Http/",
+            "Owl\\Mvc\\": "src/Mvc/",
+            "Owl\\Swoole\\": "src/Swoole/",
+            "Owl\\Traits\\": "src/Traits/"
         }
     },
     "autoload-dev": {
