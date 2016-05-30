@@ -1,8 +1,8 @@
 {
-    "name": "yeaha/owl",
+    "name": "yeaha/owl-mvc",
     "description": "RESTFul Web Framework",
     "keywords": ["framework", "mvc", "swoole", "restful", "orm", "datamapper"],
-    "homepage": "https://github.com/yeaha/owl",
+    "homepage": "https://github.com/yeaha/owl-mvc",
     "license": "MIT",
     "authors": [
         {
@@ -14,20 +14,16 @@
     "require": {
         "php": ">=5.6.0",
         "psr/http-message": "^1.0",
-        "psr/log": "1.0.0",
-        "psr/cache": "1.0.0"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^5.1.0"
-    },
-    "suggest": {
-        "monolog/monolog": "Allows more advanced logging of the application flow"
-    },
-    "archive": {
-        "exclude": ["/examples", "/tests"]
+        "yeaha/owl-core": "dev-master"
     },
     "autoload": {
-        "psr-4": {"Owl\\": "src"},
-        "files": ["src/constant.php", "src/functions.php"]
+        "psr-4": {
+            "Owl\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
     }
 }
