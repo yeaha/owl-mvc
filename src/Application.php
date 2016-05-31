@@ -187,23 +187,4 @@ class Application
             return $loader($classname, true);
         }
     }
-
-    protected static $logger;
-
-    public static function setLogger(\Psr\Log\LoggerInterface $logger)
-    {
-        self::$logger = $logger;
-    }
-
-    public static function unsetLogger()
-    {
-        self::$logger = null;
-    }
-
-    public static function log($level, $message, array $context = [])
-    {
-        if ($logger = self::$logger) {
-            $logger->log($level, $message, $context);
-        }
-    }
 }

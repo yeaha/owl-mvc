@@ -18,12 +18,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Owl\\": "src/",
             "Owl\\Context\\": "src/Context/",
             "Owl\\Http\\": "src/Http/",
             "Owl\\Mvc\\": "src/Mvc/",
             "Owl\\Swoole\\": "src/Swoole/",
-            "Owl\\Traits\\": "src/Traits/"
+            "Owl\\Traits\\": "src/Traits/",
+            "Owl\\": "src/"
         }
     },
     "autoload-dev": {

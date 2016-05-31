@@ -1,8 +1,7 @@
 <?php
-
 namespace Owl\Mvc;
 
-use Owl\Application as App;
+use Owl\Logger;
 
 /**
  * @example
@@ -50,14 +49,8 @@ class Router
      */
     protected $children = [];
 
-    protected function __beforeRespond(\Owl\Http\Request $request, \Owl\Http\Response $response, $controller, array $paramters)
-    {
-    }
-
-    protected function __afterRespond(\Owl\Http\Request $request, \Owl\Http\Response $response, $controller, array $paramters)
-    {
-    }
-
+    protected function __beforeRespond(\Owl\Http\Request $request, \Owl\Http\Response $response, $controller, array $paramters) {}
+    protected function __afterRespond(\Owl\Http\Request $request, \Owl\Http\Response $response, $controller, array $paramters) {}
     public function __construct(array $config = [])
     {
         (new \Owl\Parameter\Validator())->execute($config, [
@@ -87,8 +80,8 @@ class Router
     public function getConfig($key)
     {
         return isset($this->config[$key])
-             ? $this->config[$key]
-             : false;
+        ? $this->config[$key]
+        : false;
     }
 
     /**
@@ -214,7 +207,7 @@ class Router
      */
     protected function respond(\Owl\Http\Request $request, \Owl\Http\Response $response)
     {
-        App::log('debug', 'router respond', [
+        Logger::log('debug', 'router respond', [
             'url' => (string) $request->getUri(),
             'method' => $request->getMethod(),
         ]);
@@ -222,7 +215,7 @@ class Router
         $path = $this->getRequestPath($request);
         list($class, $parameters) = $this->byRewrite($path) ?: $this->byPath($path);
 
-        App::log('debug', 'router dispatch', [
+        Logger::log('debug', 'router dispatch', [
             'class' => $class,
             'parameters' => $parameters,
         ]);
@@ -320,8 +313,8 @@ class Router
         }
 
         $path = ($pathinfo['dirname'] === '/')
-              ? $pathinfo['dirname'].$pathinfo['filename']
-              : $pathinfo['dirname'].'/'.$pathinfo['filename'];
+        ? $pathinfo['dirname'].$pathinfo['filename']
+        : $pathinfo['dirname'].'/'.$pathinfo['filename'];
         $path = $this->normalizePath($path);
 
         if ($path === '/') {
