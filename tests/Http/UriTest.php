@@ -1,5 +1,4 @@
 <?php
-
 namespace Tests\Http;
 
 class UriTest extends \PHPUnit_Framework_TestCase
@@ -131,6 +130,11 @@ class UriTest extends \PHPUnit_Framework_TestCase
         $this->assertMethods($uri->withFragment(''), [
             'getFragment' => '',
             '__toString' => 'http://foo:bar@www.example.com:88/p1?a=b&c=d',
+        ]);
+
+        // test rfc 3986
+        $this->assertMethods($uri->withQuery(['foo' => 'b a r']), [
+            'getQuery' => 'foo=b%20a%20r',
         ]);
     }
 

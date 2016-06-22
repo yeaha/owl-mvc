@@ -1,5 +1,4 @@
 <?php
-
 namespace Owl\Http;
 
 use Psr\Http\Message\UriInterface;
@@ -90,8 +89,8 @@ class Uri implements UriInterface
         }
 
         return $port === self::$standard_port[$scheme]
-             ? null
-             : $port;
+        ? null
+        : $port;
     }
 
     public function getPath()
@@ -163,7 +162,7 @@ class Uri implements UriInterface
     public function withQuery($query)
     {
         if (is_array($query)) {
-            $query = http_build_query($query);
+            $query = http_build_query($query, null, null, PHP_QUERY_RFC3986);
         }
 
         $uri = clone $this;
