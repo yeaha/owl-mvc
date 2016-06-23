@@ -133,8 +133,8 @@ class UriTest extends \PHPUnit_Framework_TestCase
         ]);
 
         // test rfc 3986
-        $this->assertMethods($uri->withQuery(['foo' => 'b a r']), [
-            'getQuery' => 'foo=b%20a%20r',
+        $this->assertMethods($uri->withQuery(['foo' => 'b a r', 'f' => 'b a z']), [
+            'getQuery' => 'foo=b%20a%20r&f=b%20a%20z',
         ]);
     }
 

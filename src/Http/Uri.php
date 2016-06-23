@@ -162,7 +162,7 @@ class Uri implements UriInterface
     public function withQuery($query)
     {
         if (is_array($query)) {
-            $query = http_build_query($query, null, null, PHP_QUERY_RFC3986);
+            $query = http_build_query($query, '', '&', PHP_QUERY_RFC3986);
         }
 
         $uri = clone $this;
