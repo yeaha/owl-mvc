@@ -1,11 +1,10 @@
 <?php
-
 namespace Owl\Http;
 
-use Owl\Http\ResourceStream;
 use Owl\Http\Uri;
-use Psr\Http\Message\ServerRequestInterface;
+use Owl\Http\ResourceStream;
 use Psr\Http\Message\UriInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class Request implements ServerRequestInterface
 {
@@ -21,11 +20,11 @@ class Request implements ServerRequestInterface
 
     public function __construct($get = null, $post = null, $server = null, $cookies = null, $files = null)
     {
-        $this->get = $get === null ? $_GET : $get;
-        $this->post = $post === null ? $_POST : $post;
-        $this->server = $server === null ? $_SERVER : $server;
+        $this->get     = $get === null ? $_GET : $get;
+        $this->post    = $post === null ? $_POST : $post;
+        $this->server  = $server === null ? $_SERVER : $server;
         $this->cookies = $cookies === null ? $_COOKIE : $cookies;
-        $this->files = $files === null ? $_FILES : $files;
+        $this->files   = $files === null ? $_FILES : $files;
 
         $this->initialize();
     }
@@ -33,7 +32,7 @@ class Request implements ServerRequestInterface
     public function __clone()
     {
         $this->method = null;
-        $this->uri = null;
+        $this->uri    = null;
     }
 
     public function get($key = null)
@@ -103,7 +102,7 @@ class Request implements ServerRequestInterface
 
     public function withMethod($method)
     {
-        $result = clone $this;
+        $result         = clone $this;
         $result->method = strtoupper($method);
 
         return $result;
@@ -115,17 +114,17 @@ class Request implements ServerRequestInterface
             return $this->uri;
         }
 
-        $scheme = $this->getServerParam('HTTPS') ? 'https' : 'http';
-        $user = $this->getServerParam('PHP_AUTH_USER');
+        $scheme   = $this->getServerParam('HTTPS') ? 'https' : 'http';
+        $user     = $this->getServerParam('PHP_AUTH_USER');
         $password = $this->getServerParam('PHP_AUTH_PW');
-        $host = $this->getServerParam('SERVER_NAME') ?: $this->getServerParam('SERVER_ADDR') ?: '127.0.0.1';
-        $port = $this->getServerParam('SERVER_PORT');
+        $host     = $this->getServerParam('SERVER_NAME') ?: $this->getServerParam('SERVER_ADDR') ?: '127.0.0.1';
+        $port     = $this->getServerParam('SERVER_PORT');
 
         return $this->uri = (new Uri($this->getRequestTarget()))
-                            ->withScheme($scheme)
-                            ->withUserInfo($user, $password)
-                            ->withHost($host)
-                            ->withPort($port);
+            ->withScheme($scheme)
+            ->withUserInfo($user, $password)
+            ->withHost($host)
+            ->withPort($port);
     }
 
     public function withUri(UriInterface $uri, $preserveHost = false)
@@ -197,7 +196,7 @@ class Request implements ServerRequestInterface
     public function getParsedBody()
     {
         $content_type = $this->getHeaderLine('content-type');
-        $method = $this->getServerParam('REQUEST_METHOD');
+        $method       = $this->getServerParam('REQUEST_METHOD');
 
         if ($method === 'POST' && ($content_type === 'application/x-www-form-urlencoded' || $content_type === 'multipart/form-data')) {
             return $this->post;
@@ -242,16 +241,16 @@ class Request implements ServerRequestInterface
         }
 
         // private ip range, ip2long()
-        $private = array(
-            array(0, 50331647),             // 0.0.0.0, 2.255.255.255
-            array(167772160, 184549375),    // 10.0.0.0, 10.255.255.255
-            array(2130706432, 2147483647),  // 127.0.0.0, 127.255.255.255
-            array(2851995648, 2852061183),  // 169.254.0.0, 169.254.255.255
-            array(2886729728, 2887778303),  // 172.16.0.0, 172.31.255.255
-            array(3221225984, 3221226239),  // 192.0.2.0, 192.0.2.255
-            array(3232235520, 3232301055),  // 192.168.0.0, 192.168.255.255
-            array(4294967040, 4294967295),  // 255.255.255.0 255.255.255.255
-        );
+        $private = [
+            [0, 50331647],            // 0.0.0.0, 2.255.255.255
+            [167772160, 184549375],   // 10.0.0.0, 10.255.255.255
+            [2130706432, 2147483647], // 127.0.0.0, 127.255.255.255
+            [2851995648, 2852061183], // 169.254.0.0, 169.254.255.255
+            [2886729728, 2887778303], // 172.16.0.0, 172.31.255.255
+            [3221225984, 3221226239], // 192.0.2.0, 192.0.2.255
+            [3232235520, 3232301055], // 192.168.0.0, 192.168.255.255
+            [4294967040, 4294967295], // 255.255.255.0 255.255.255.255
+        ];
 
         $ip_set = array_map('trim', explode(',', $ip));
 
@@ -316,7 +315,7 @@ class Request implements ServerRequestInterface
         $headers = [];
         foreach ($this->server as $key => $value) {
             if (strpos($key, 'HTTP_') === 0) {
-                $key = strtolower(str_replace('_', '-', substr($key, 5)));
+                $key           = strtolower(str_replace('_', '-', substr($key, 5)));
                 $headers[$key] = explode(',', $value);
             }
         }
@@ -351,18 +350,18 @@ class Request implements ServerRequestInterface
     public static function factory(array $options = [])
     {
         $options = array_merge([
-            'uri' => '/',
-            'method' => 'GET',
+            'uri'     => '/',
+            'method'  => 'GET',
             'cookies' => [],
             'headers' => [],
-            'get' => [],
-            'post' => [],
-            'ip' => '',
+            'get'     => [],
+            'post'    => [],
+            'ip'      => '',
         ], $options);
 
-        $server = [];
+        $server                   = [];
         $server['REQUEST_METHOD'] = strtoupper($options['method']);
-        $server['REQUEST_URI'] = $options['uri'];
+        $server['REQUEST_URI']    = $options['uri'];
 
         if ($options['ip']) {
             $server['REMOTE_ADDR'] = $options['ip'];
@@ -374,15 +373,15 @@ class Request implements ServerRequestInterface
         }
 
         $cookies = $options['cookies'];
-        $get = $options['get'];
-        $post = $options['post'];
+        $get     = $options['get'];
+        $post    = $options['post'];
 
         if ($server['REQUEST_METHOD'] === 'GET') {
             $post = [];
         }
 
         foreach ($options['headers'] as $key => $value) {
-            $key = 'HTTP_'.strtoupper(str_replace('-', '_', $key));
+            $key          = 'HTTP_'.strtoupper(str_replace('-', '_', $key));
             $server[$key] = $value;
         }
 
