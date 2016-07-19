@@ -117,7 +117,7 @@ class Request implements ServerRequestInterface
         $scheme   = $this->getServerParam('HTTPS') ? 'https' : 'http';
         $user     = $this->getServerParam('PHP_AUTH_USER');
         $password = $this->getServerParam('PHP_AUTH_PW');
-        $host     = $this->getServerParam('SERVER_NAME') ?: $this->getServerParam('SERVER_ADDR') ?: '127.0.0.1';
+        $host     = $this->getServerParam('HTTP_HOST') ?: $this->getServerParam('SERVER_NAME') ?: $this->getServerParam('SERVER_ADDR') ?: '127.0.0.1';
         $port     = $this->getServerParam('SERVER_PORT');
 
         return $this->uri = (new Uri($this->getRequestTarget()))
