@@ -117,14 +117,30 @@ class Request implements ServerRequestInterface
         $scheme   = $this->getServerParam('HTTPS') ? 'https' : 'http';
         $user     = $this->getServerParam('PHP_AUTH_USER');
         $password = $this->getServerParam('PHP_AUTH_PW');
-        $host     = $this->getServerParam('HTTP_HOST') ?: $this->getServerParam('SERVER_NAME') ?: $this->getServerParam('SERVER_ADDR') ?: '127.0.0.1';
-        $port     = $this->getServerParam('SERVER_PORT');
 
-        return $this->uri = (new Uri($this->getRequestTarget()))
+        if ($http_host = $this->getServerParam('HTTP_HOST')) {
+            if (strpos($http_host, ':') === false) {
+                $host = $http_host;
+                $port = 0;
+            } else {
+                list($host, $port) = explode(':', $http_host, 2);
+                $port = intval($port);
+            }
+        } else {
+            $host = $this->getServerParam('SERVER_NAME') ?: $this->getServerParam('SERVER_ADDR') ?: '127.0.0.1';
+            $port = $this->getServerParam('SERVER_PORT');
+        }
+
+        $uri = (new Uri($this->getRequestTarget()))
             ->withScheme($scheme)
             ->withUserInfo($user, $password)
-            ->withHost($host)
-            ->withPort($port);
+            ->withHost(strtolower($host));
+
+        if ($port) {
+            $uri = $uri->withPort($port);
+        }
+
+        return $uri;
     }
 
     public function withUri(UriInterface $uri, $preserveHost = false)
@@ -357,9 +373,10 @@ class Request implements ServerRequestInterface
             'get'     => [],
             'post'    => [],
             'ip'      => '',
+            '_SERVER' => [],
         ], $options);
 
-        $server                   = [];
+        $server                   = array_change_key_case($options['_SERVER'], CASE_UPPER);
         $server['REQUEST_METHOD'] = strtoupper($options['method']);
         $server['REQUEST_URI']    = $options['uri'];
 

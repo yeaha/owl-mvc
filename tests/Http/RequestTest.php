@@ -1,5 +1,4 @@
 <?php
-
 namespace Tests\Http;
 
 class RequestTest extends \PHPUnit_Framework_TestCase
@@ -26,7 +25,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
     {
         $request = \Owl\Http\Request::factory([
             'method' => 'post',
-            'post' => [
+            'post'   => [
                 'foo' => '1',
                 'bar' => '',
             ],
@@ -59,7 +58,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
             'headers' => [
                 'Accept-Encoding' => 'gzip,deflate',
                 'Accept-Language' => 'en-us,en;q=0.8,zh-cn;q=0.5,zh;q=0.3',
-                'Connection' => 'keepalive',
+                'Connection'      => 'keepalive',
             ],
         ]);
 
@@ -68,7 +67,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $this->assertSame([
             'accept-encoding' => ['gzip', 'deflate'],
             'accept-language' => ['en-us', 'en;q=0.8', 'zh-cn;q=0.5', 'zh;q=0.3'],
-            'connection' => ['keepalive'],
+            'connection'      => ['keepalive'],
         ], $request->getHeaders());
     }
 
@@ -85,18 +84,18 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
         $request = \Owl\Http\Request::factory([
             'method' => 'POST',
-            'post' => [
+            'post'   => [
                 '_method' => 'PUT',
             ],
         ]);
         $this->assertEquals('PUT', $request->getMethod());
 
         $request = \Owl\Http\Request::factory([
-            'method' => 'POST',
+            'method'  => 'POST',
             'headers' => [
                 'x-http-method-override' => 'DELETE',
             ],
-            'post' => [
+            'post'    => [
                 'foo' => 'bar',
             ],
         ]);
@@ -105,7 +104,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
     public function testRequestURI()
     {
-        $uri = '/foobar.json?foo=bar';
+        $uri     = '/foobar.json?foo=bar';
         $request = \Owl\Http\Request::factory([
             'uri' => $uri,
         ]);
@@ -113,12 +112,36 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($uri, $request->getRequestTarget());
         $this->assertEquals('/foobar.json', $request->getUri()->getPath());
         $this->assertEquals('json', $request->getUri()->getExtension());
+
+        $request = \Owl\Http\Request::factory([
+            'uri'     => '/',
+            '_SERVER' => [
+                'SERVER_NAME' => 'test.example.com',
+            ],
+        ]);
+
+        $uri = $request->getUri();
+        $this->assertEquals('test.example.com', $uri->getHost());
+
+        $request = \Owl\Http\Request::factory([
+            'uri'     => '/',
+            'headers' => [
+                'host' => 'www.example.com:88',
+            ],
+            '_SERVER' => [
+                'SERVER_NAME' => 'test.example.com',
+            ],
+        ]);
+
+        $uri = $request->getUri();
+        $this->assertEquals('www.example.com', $uri->getHost());
+        $this->assertEquals(88, $uri->getPort());
     }
 
     public function testGetIP()
     {
         $server = [
-            'REMOTE_ADDR' => '127.0.0.1',
+            'REMOTE_ADDR'          => '127.0.0.1',
             'HTTP_X_FORWARDED_FOR' => '192.168.1.2,3.3.3.3',
         ];
 
@@ -131,7 +154,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         $server = [
-            'REMOTE_ADDR' => '127.0.0.1',
+            'REMOTE_ADDR'          => '127.0.0.1',
             'HTTP_X_FORWARDED_FOR' => '192.168.1.2,192.168.1.3',
         ];
 
