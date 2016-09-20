@@ -103,7 +103,7 @@ class Application
         $exception_handler = $this->getExceptionHandler();
         $method = $request->getMethod();
         try {
-            if (!in_array($method, ['HEAD', 'OPTION', 'GET', 'POST', 'PUT', 'DELETE', 'PATCH'])) {
+            if (!in_array($method, ['HEAD', 'OPTIONS', 'GET', 'POST', 'PUT', 'DELETE', 'PATCH'])) {
                 throw \Owl\Http\Exception::factory(501);
             }
 
