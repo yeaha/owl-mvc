@@ -124,7 +124,7 @@ class Request implements ServerRequestInterface
                 $port = 0;
             } else {
                 list($host, $port) = explode(':', $http_host, 2);
-                $port = intval($port);
+                $port              = intval($port);
             }
         } else {
             $host = $this->getServerParam('SERVER_NAME') ?: $this->getServerParam('SERVER_ADDR') ?: '127.0.0.1';
@@ -197,8 +197,18 @@ class Request implements ServerRequestInterface
     {
         $files = [];
 
-        foreach ($this->files as $key => $file) {
-            $files[$key] = new \Owl\Http\UploadedFile($file);
+        foreach (self::normailizeUploadedFiles($this->files) as $key => $file) {
+            if (isset($file['name'])) {
+                $files[$key] = new UploadedFile($file);
+            } else {
+                foreach ($file as $f) {
+                    if ($f['name'] === '') {
+                        continue;
+                    }
+
+                    $files[$key][] = new UploadedFile($f);
+                }
+            }
         }
 
         return $files;
@@ -403,6 +413,27 @@ class Request implements ServerRequestInterface
         }
 
         return new self($get, $post, $server, $cookies);
+    }
+
+    private static function normailizeUploadedFiles($files)
+    {
+        $result = [];
+
+        foreach ($files as $key => $file) {
+            if (is_array($file['name'])) {
+                foreach ($file['name'] as $i => $name) {
+                    $result[$key][$i]['name']     = $name;
+                    $result[$key][$i]['type']     = $file['type'][$i];
+                    $result[$key][$i]['tmp_name'] = $file['tmp_name'][$i];
+                    $result[$key][$i]['error']    = $file['error'][$i];
+                    $result[$key][$i]['size']     = $file['size'][$i];
+                }
+            } else {
+                $result[$key] = $file;
+            }
+        }
+
+        return $result;
     }
 
     /**
