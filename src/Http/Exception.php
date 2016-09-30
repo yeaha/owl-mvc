@@ -27,7 +27,7 @@ class Exception extends \Exception
         return $this->body;
     }
 
-    public static function factory($status, \Exception $previous = null)
+    public static function factory($status, \Throwable $previous = null)
     {
         return new self(\Owl\Http::getStatusPhrase($status), $status, $previous);
     }
