@@ -31,13 +31,12 @@ class Uri implements UriInterface
             'port'     => null,
             'user'     => '',
             'pass'     => '',
-            'path'     => '/',
+            'path'     => '',
             'query'    => '',
             'fragment' => '',
         ], parse_url($uri));
 
         parse_str($parsed['query'], $parsed['query']);
-        $parsed['path'] = $parsed['path'] ?: '/';
 
         foreach ($parsed as $key => $value) {
             $this->$key = $value;
@@ -100,7 +99,7 @@ class Uri implements UriInterface
 
     public function getPath()
     {
-        return $this->path;
+        return $this->path ?: '/';
     }
 
     public function getExtension()
@@ -180,7 +179,7 @@ class Uri implements UriInterface
     public function withPath($path)
     {
         $uri       = clone $this;
-        $uri->path = $path ?: '/';
+        $uri->path = $path;
 
         return $uri;
     }
