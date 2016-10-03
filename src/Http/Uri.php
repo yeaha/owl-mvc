@@ -36,8 +36,13 @@ class Uri implements UriInterface
         $this->user = isset($parsed['user']) ? $parsed['user'] : '';
         $this->password = isset($parsed['pass']) ? $parsed['pass'] : '';
         $this->path = isset($parsed['path']) ? $parsed['path'] : '/';
-        $this->query = isset($parsed['query']) ? $parsed['query'] : '';
         $this->fragment = isset($parsed['fragment']) ? $parsed['fragment'] : '';
+
+        $query = [];
+        if (isset($parsed['query']) && $parsed['query']) {
+            parse_str($parsed['query'], $query);
+        }
+        $this->query = $query;
     }
 
     public function getScheme()
@@ -105,7 +110,13 @@ class Uri implements UriInterface
 
     public function getQuery()
     {
-        return $this->query;
+        $query = '';
+
+        if ($this->query) {
+            $query = http_build_query($this->query , '', '&', PHP_QUERY_RFC3986);
+        }
+
+        return $query;
     }
 
     public function getFragment()
@@ -161,12 +172,12 @@ class Uri implements UriInterface
 
     public function withQuery($query)
     {
-        if (is_array($query)) {
-            $query = http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        if (is_string($query)) {
+            parse_str($query, $query);
         }
 
         $uri = clone $this;
-        $uri->query = $query ?: '';
+        $uri->query = $query ?: [];
 
         return $uri;
     }
