@@ -18,31 +18,30 @@ class Uri implements UriInterface
     protected $host;
     protected $port;
     protected $user;
-    protected $password;
+    protected $pass;
     protected $path;
     protected $query;
     protected $fragment;
 
     public function __construct($uri = '')
     {
-        $parsed = [];
-        if ($uri) {
-            $parsed = parse_url($uri) ?: [];
-        }
+        $parsed = array_merge([
+            'scheme'   => '',
+            'host'     => '',
+            'port'     => null,
+            'user'     => '',
+            'pass'     => '',
+            'path'     => '/',
+            'query'    => '',
+            'fragment' => '',
+        ], parse_url($uri));
 
-        $this->scheme   = isset($parsed['scheme']) ? $parsed['scheme'] : '';
-        $this->host     = isset($parsed['host']) ? $parsed['host'] : '';
-        $this->port     = isset($parsed['port']) ? $parsed['port'] : null;
-        $this->user     = isset($parsed['user']) ? $parsed['user'] : '';
-        $this->password = isset($parsed['pass']) ? $parsed['pass'] : '';
-        $this->path     = isset($parsed['path']) ? $parsed['path'] : '/';
-        $this->fragment = isset($parsed['fragment']) ? $parsed['fragment'] : '';
+        parse_str($parsed['query'], $parsed['query']);
+        $parsed['path'] = $parsed['path'] ?: '/';
 
-        $query = [];
-        if (isset($parsed['query']) && $parsed['query']) {
-            parse_str($parsed['query'], $query);
+        foreach ($parsed as $key => $value) {
+            $this->$key = $value;
         }
-        $this->query = $query;
     }
 
     public function getScheme()
@@ -71,8 +70,8 @@ class Uri implements UriInterface
     {
         $user_info = $this->user;
 
-        if ($user_info !== '' && $this->password) {
-            $user_info .= ':'.$this->password;
+        if ($user_info !== '' && $this->pass) {
+            $user_info .= ':'.$this->pass;
         }
 
         return $user_info;
@@ -140,9 +139,9 @@ class Uri implements UriInterface
 
     public function withUserInfo($user, $password = null)
     {
-        $uri           = clone $this;
-        $uri->user     = $user;
-        $uri->password = $password;
+        $uri       = clone $this;
+        $uri->user = $user;
+        $uri->pass = $password;
 
         return $uri;
     }
