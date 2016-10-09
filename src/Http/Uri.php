@@ -211,13 +211,23 @@ class Uri implements UriInterface
         return $uri;
     }
 
-    public function withoutQuery(array $keys = [])
+    /**
+     * @example
+     * $uri->withoutQuery();                // without all
+     * $uri->withoutQuery(['foo', 'bar']);
+     * $uri->withoutQuery('foo', 'bar');
+     */
+    public function withoutQuery($keys = null)
     {
         $query = $this->query;
 
         if (!$keys) {
             $query = [];
         } else {
+            $keys = is_array($keys)
+            ? $keys
+            : func_get_args();
+
             foreach ($keys as $key) {
                 unset($query[$key]);
             }

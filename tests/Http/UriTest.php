@@ -176,6 +176,11 @@ class UriTest extends \PHPUnit_Framework_TestCase
             '__toString' => 'http://foo:bar@www.example.com:88/p1?a=b#f'
         ]);
 
+        $this->assertMethods($uri->withoutQuery('c'), [
+            'getQuery' => 'a=b',
+            '__toString' => 'http://foo:bar@www.example.com:88/p1?a=b#f'
+        ]);
+
         $this->assertMethods($uri->withoutFragment(), [
             'getFragment' => '',
             '__toString' => 'http://foo:bar@www.example.com:88/p1?a=b&c=d'
