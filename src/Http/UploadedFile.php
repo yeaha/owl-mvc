@@ -1,5 +1,4 @@
 <?php
-
 namespace Owl\Http;
 
 class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
@@ -35,12 +34,12 @@ class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
             throw new \InvalidArgumentException('Invalid target path, '.$target_path);
         }
 
-        $this->moved = true;
-
         $target = $targetPath.'/'.($this->getClientFilename() ?: $this->file['tmp_name']);
         if (!move_uploaded_file($this->file['tmp_name'], $target)) {
             throw new \RuntimeException('Unable to move upload file');
         }
+
+        $this->moved = true;
 
         return $target;
     }
@@ -53,6 +52,15 @@ class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
     public function getError()
     {
         return $this->file['error'];
+    }
+
+    public function getTmpName()
+    {
+        if ($this->moved) {
+            return '';
+        }
+
+        return $this->file['tmp_name'] ?? '';
     }
 
     public function getClientFilename()
