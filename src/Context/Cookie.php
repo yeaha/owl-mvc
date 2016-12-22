@@ -8,11 +8,18 @@
  *     'token' => (string),                 // 必须，上下文存储唯一标识
  *     'sign_salt' => (mixed),              // 必须，用于计算数字签名的salt，可以为字符串或者callable方法
  *     'encrypt' => array(                  // 可选，加密方法配置
+ *         // for mcrypt
  *         (string),                        //   必须，salt string，随机字符串
  *         (string),                        //   可选，ciphers name，默认MCRYPT_RIJNDAEL_256
  *         (string),                        //   可选，ciphers mode, 默认MCRYPT_MODE_CBC
  *         (integer),                       //   可选，random device，默认自动匹配可用的
+ *
+ *         // for openssl
+ *         (string),                        //   必须，salt string，随机字符串
+ *         (string),                        //   可选，ciphers name，默认AES-128-CBC
+ *         (integer),                       //   可选，openssl_encrypt() / openssl_decrypt() $options参数
  *     ),
+ *     'encrypt_extension' => (string),     // 可选，mcrypt或openssl，默认自动选择
  *     'domain' => (string),                // 可选，cookie 域名，默认：null
  *     'path' => (string),                  // 可选，cookie 路径，默认：/
  *     'expire_at' => (integer),            // 可选，过期时间，优先级高于ttl
@@ -34,7 +41,7 @@ class Cookie extends \Owl\Context
     public function __construct(array $config)
     {
         (new \Owl\Parameter\Validator())->execute($config, [
-            'request' => ['type' => 'object', 'instanceof' => '\Owl\Http\Request'],
+            'request'  => ['type' => 'object', 'instanceof' => '\Owl\Http\Request'],
             'response' => ['type' => 'object', 'instanceof' => '\Owl\Http\Response'],
         ]);
 
@@ -89,11 +96,11 @@ class Cookie extends \Owl\Context
     public function save()
     {
         $token = $this->getToken();
-        $data = $this->data ? $this->encode($this->data) : '';
+        $data  = $this->data ? $this->encode($this->data) : '';
         if (!$expire = (int) $this->getConfig('expire_at')) {
             $expire = ($ttl = (int) $this->getConfig('ttl')) ? (time() + $ttl) : 0;
         }
-        $path = $this->getConfig('path') ?: '/';
+        $path   = $this->getConfig('path') ?: '/';
         $domain = $this->getConfig('domain');
 
         $this->getConfig('response')->setCookie($token, $data, $expire, $path, $domain);
@@ -130,14 +137,14 @@ class Cookie extends \Owl\Context
         $data = \Owl\safe_json_encode($data);
 
         // 添加数字签名
-        $data = $data.$this->getSign($data);
+        $data = $data . $this->getSign($data);
 
         if ($this->getConfig('encrypt')) {      // 加密，加密数据不需要压缩
             $data = $this->encrypt($data);
         } elseif ($this->getConfig('zip')) {    // 压缩
             // 压缩文本最前面有'_'，用于判断是否压缩数据
             // 否则在运行期间切换压缩配置时，错误的数据格式会导致gzcompress()报错
-            $data = '_'.gzcompress($data, 9);
+            $data = '_' . gzcompress($data, 9);
         }
 
         return base64_encode($data);
@@ -169,7 +176,7 @@ class Cookie extends \Owl\Context
                 break;
             }
 
-            $hash = substr($string, $hash_length * -1);
+            $hash   = substr($string, $hash_length * -1);
             $string = substr($string, 0, strlen($string) - $hash_length);
 
             if ($this->getSign($string) !== $hash) {
@@ -185,95 +192,17 @@ class Cookie extends \Owl\Context
     // 加密字符串
     protected function encrypt($string)
     {
-        list($salt, $cipher, $mode, $device) = $this->getEncryptConfig();
-
-        $iv_size = mcrypt_get_iv_size($cipher, $mode);
-
-        $salt = substr(md5($salt), 0, $iv_size);
-        $iv = mcrypt_create_iv($iv_size, $device);
-
-        $string = $this->pad($string);
-
-        $encrypted = mcrypt_encrypt($cipher, $salt, $string, $mode, $iv);
-
-        // 把iv保存和加密字符串在一起输出，解密的时候需要相同的iv
-        return $iv.$encrypted;
+        return $this->getEncryptExtension() === 'mcrypt'
+             ? $this->encryptWithMcrypt($string)
+             : $this->encryptWithOpenssl($string);
     }
 
     // 解密字符串
     protected function decrypt($string)
     {
-        list($salt, $cipher, $mode, $device) = $this->getEncryptConfig();
-
-        $iv_size = mcrypt_get_iv_size($cipher, $mode);
-
-        $salt = substr(md5($salt), 0, $iv_size);
-        $iv = substr($string, 0, $iv_size);
-
-        $string = substr($string, $iv_size);
-
-        $decrypted = mcrypt_decrypt($cipher, $salt, $string, $mode, $iv);
-
-        return $this->unpad($decrypted);
-    }
-
-    // 获得加密配置
-    protected function getEncryptConfig()
-    {
-        $config = $this->getConfig('encrypt') ?: array();
-
-        if (!isset($config[0]) || !$config[0]) {
-            throw new \RuntimeException('Require encrypt salt string');
-        }
-
-        $salt = $config[0];
-
-        $cipher = isset($config[1]) ? $config[1] : MCRYPT_RIJNDAEL_256;
-        if (!in_array($cipher, mcrypt_list_algorithms())) {
-            throw new \RuntimeException('Unsupport encrypt cipher: '.$cipher);
-        }
-
-        $mode = isset($config[2]) ? $config[2] : MCRYPT_MODE_CBC;
-        if (!in_array($mode, mcrypt_list_modes())) {
-            throw new \RuntimeException('Unsupport encrypt mode: '.$mode);
-        }
-
-        if (isset($config[3])) {
-            $device = $config[3];
-        } elseif (defined('MCRYPT_DEV_URANDOM')) {
-            $device = MCRYPT_DEV_URANDOM;
-        } elseif (defined('MCRYPT_DEV_RANDOM')) {
-            $device = MCRYPT_DEV_RANDOM;
-        } else {
-            mt_srand();
-            $device = MCRYPT_RAND;
-        }
-
-        return [$salt, $cipher, $mode, $device];
-    }
-
-    // 用PKCS7兼容字符串补全加密块
-    protected function pad($string, $block = 32)
-    {
-        $pad = $block - (strlen($string) % $block);
-
-        return $string.str_repeat(chr($pad), $pad);
-    }
-
-    // 去掉填充的PKCS7兼容字符串
-    protected function unpad($string, $block = 32)
-    {
-        $pad = ord(substr($string, -1));
-
-        if ($pad and $pad < $block) {
-            if (!preg_match('/'.chr($pad).'{'.$pad.'}$/', $string)) {
-                return false;
-            }
-
-            return substr($string, 0, strlen($string) - $pad);
-        }
-
-        return $string;
+        return $this->getEncryptExtension() === 'mcrypt'
+             ? $this->decryptWithMcrypt($string)
+             : $this->decryptWithOpenssl($string);
     }
 
     // 生成数字签名
@@ -281,7 +210,7 @@ class Cookie extends \Owl\Context
     {
         $salt = $this->getSignSalt($string);
 
-        return sha1($string.$salt, true);
+        return sha1($string . $salt, true);
     }
 
     // 获得计算数字签名的salt字符串
@@ -301,5 +230,167 @@ class Cookie extends \Owl\Context
         }
 
         return $salt;
+    }
+
+    protected function getEncryptExtension()
+    {
+        $extension = $this->getConfig('encrypt_extension') ?: '';
+
+        if ($extension === 'mcrypt' || $extension === 'openssl') {
+            return $extension;
+        }
+
+        // php7.1 deprecated ext/mcrypt.
+        if (version_compare(PHP_VERSION, '7.1.0', '>=')) {
+            if (!extension_loaded('openssl')) {
+                throw new \Exception('Require OPENSSL extension');
+            }
+
+            return 'openssl';
+        }
+
+        // < 7.1, use mcrypt first
+        if (extension_loaded('mcrypt')) {
+            return 'mcrypt';
+        } elseif (extension_loaded('openssl')) {
+            return 'openssl';
+        }
+
+        throw new \Exception('Require MCRYPT extension');
+    }
+
+    protected function getMcryptConfig()
+    {
+        $config = $this->getConfig('encrypt') ?: [];
+
+        if (!isset($config[0]) || !$config[0]) {
+            throw new \RuntimeException('Require encrypt salt string');
+        }
+
+        $salt = $config[0];
+
+        $cipher = isset($config[1]) ? $config[1] : MCRYPT_RIJNDAEL_256;
+        if (!in_array($cipher, mcrypt_list_algorithms())) {
+            throw new \RuntimeException('Unsupport encrypt cipher: ' . $cipher);
+        }
+
+        $mode = isset($config[2]) ? $config[2] : MCRYPT_MODE_CBC;
+        if (!in_array($mode, mcrypt_list_modes())) {
+            throw new \RuntimeException('Unsupport encrypt mode: ' . $mode);
+        }
+
+        if (isset($config[3])) {
+            $device = $config[3];
+        } elseif (defined('MCRYPT_DEV_URANDOM')) {
+            $device = MCRYPT_DEV_URANDOM;
+        } elseif (defined('MCRYPT_DEV_RANDOM')) {
+            $device = MCRYPT_DEV_RANDOM;
+        } else {
+            mt_srand();
+            $device = MCRYPT_RAND;
+        }
+
+        return [$salt, $cipher, $mode, $device];
+    }
+
+    protected function encryptWithMcrypt($string)
+    {
+        list($salt, $cipher, $mode, $device) = $this->getMcryptConfig();
+
+        $iv_size = mcrypt_get_iv_size($cipher, $mode);
+
+        $salt = substr(md5($salt), 0, $iv_size);
+        $iv   = mcrypt_create_iv($iv_size, $device);
+
+        $string = $this->pad($string);
+
+        $encrypted = mcrypt_encrypt($cipher, $salt, $string, $mode, $iv);
+
+        // 把iv保存和加密字符串在一起输出，解密的时候需要相同的iv
+        return $iv . $encrypted;
+    }
+
+    protected function decryptWithMcrypt($string)
+    {
+        list($salt, $cipher, $mode) = $this->getMcryptConfig();
+
+        $iv_size = mcrypt_get_iv_size($cipher, $mode);
+
+        $salt = substr(md5($salt), 0, $iv_size);
+        $iv   = substr($string, 0, $iv_size);
+
+        $string = substr($string, $iv_size);
+
+        $decrypted = mcrypt_decrypt($cipher, $salt, $string, $mode, $iv);
+
+        return $this->unpad($decrypted);
+    }
+
+    protected function getOpensslConfig()
+    {
+        $config = $this->getConfig('encrypt') ?: [];
+
+        if (!isset($config[0]) || !$config[0]) {
+            throw new \Exception('Require encrypt salt string');
+        }
+
+        $salt = $config[0];
+
+        $method = isset($config[1]) ? $config[1] : 'AES-128-CBC';
+        if (!in_array($method, openssl_get_cipher_methods())) {
+            throw new \Exception('Unsupport encrypt method: ' . $method);
+        }
+
+        $options = isset($config[2]) ? (int) $config[2] : 0;
+
+        return [$salt, $method, $options];
+    }
+
+    protected function encryptWithOpenssl($string)
+    {
+        list($salt, $method, $options) = $this->getOpensslConfig();
+
+        $iv_length = openssl_cipher_iv_length($method);
+        $iv        = $iv_length ? random_bytes($iv_length) : '';
+
+        $encrypted = openssl_encrypt($string, $method, $salt, $options, $iv);
+
+        return $iv . $encrypted;
+    }
+
+    protected function decryptWithOpenssl($string)
+    {
+        list($salt, $method, $options) = $this->getOpensslConfig();
+
+        $iv_length = openssl_cipher_iv_length($method);
+
+        $iv     = substr($string, 0, $iv_length);
+        $string = substr($string, $iv_length);
+
+        return openssl_decrypt($string, $method, $salt, $options, $iv);
+    }
+
+    // 用PKCS7兼容字符串补全加密块
+    private function pad($string, $block = 32)
+    {
+        $pad = $block - (strlen($string) % $block);
+
+        return $string . str_repeat(chr($pad), $pad);
+    }
+
+    // 去掉填充的PKCS7兼容字符串
+    private function unpad($string, $block = 32)
+    {
+        $pad = ord(substr($string, -1));
+
+        if ($pad and $pad < $block) {
+            if (!preg_match('/' . chr($pad) . '{' . $pad . '}$/', $string)) {
+                return false;
+            }
+
+            return substr($string, 0, strlen($string) - $pad);
+        }
+
+        return $string;
     }
 }
