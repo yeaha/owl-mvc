@@ -14,7 +14,7 @@ class Session extends \Owl\Context
     public function get($key = null)
     {
         $token = $this->getToken();
-        $context = isset($_SESSION[$token]) ? $_SESSION[$token] : array();
+        $context = isset($_SESSION[$token]) ? $_SESSION[$token] : [];
 
         return ($key === null)
              ? $context

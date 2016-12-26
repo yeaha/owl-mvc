@@ -166,7 +166,7 @@ class Application
                 $filename = trim(substr($classname, strlen($namespace)), '\\');
             }
 
-            $filename = $path.DIRECTORY_SEPARATOR.str_replace('\\', DIRECTORY_SEPARATOR, $filename).'.php';
+            $filename = $path . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $filename) . '.php';
 
             if ($return_filename) {
                 return $filename;

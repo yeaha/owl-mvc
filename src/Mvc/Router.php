@@ -49,8 +49,14 @@ class Router
      */
     protected $children = [];
 
-    protected function __beforeRespond(\Owl\Http\Request $request, \Owl\Http\Response $response, $controller, array $paramters) {}
-    protected function __afterRespond(\Owl\Http\Request $request, \Owl\Http\Response $response, $controller, array $paramters) {}
+    protected function __beforeRespond(\Owl\Http\Request $request, \Owl\Http\Response $response, $controller, array $paramters)
+    {
+    }
+
+    protected function __afterRespond(\Owl\Http\Request $request, \Owl\Http\Response $response, $controller, array $paramters)
+    {
+    }
+
     public function __construct(array $config = [])
     {
         (new \Owl\Parameter\Validator())->execute($config, [
@@ -60,7 +66,7 @@ class Router
         ]);
 
         if (substr($config['namespace'], -1, 1) !== '\\') {
-            $config['namespace'] = $config['namespace'].'\\';
+            $config['namespace'] = $config['namespace'] . '\\';
         }
 
         if (isset($config['base_path'])) {
@@ -110,7 +116,7 @@ class Router
         $path = $this->normalizePath($path);
 
         if ($base_path = $this->getConfig('base_path')) {
-            $base_path = $base_path.ltrim($path, '/');
+            $base_path = $base_path . ltrim($path, '/');
         } else {
             $base_path = $path;
         }
@@ -313,8 +319,8 @@ class Router
         }
 
         $path = ($pathinfo['dirname'] === '/')
-        ? $pathinfo['dirname'].$pathinfo['filename']
-        : $pathinfo['dirname'].'/'.$pathinfo['filename'];
+        ? $pathinfo['dirname'] . $pathinfo['filename']
+        : $pathinfo['dirname'] . '/' . $pathinfo['filename'];
         $path = $this->normalizePath($path);
 
         if ($path === '/') {
@@ -327,7 +333,7 @@ class Router
                 $class[] = $word;
             }
         }
-        $class = $this->getConfig('namespace').implode('\\', array_map('ucfirst', $class));
+        $class = $this->getConfig('namespace') . implode('\\', array_map('ucfirst', $class));
 
         return [$class, []];
     }
@@ -369,7 +375,7 @@ class Router
             throw \Owl\Http\Exception::factory(404);
         }
 
-        return '/'.substr($path, strlen($base_path));
+        return '/' . substr($path, strlen($base_path));
     }
 
     /**

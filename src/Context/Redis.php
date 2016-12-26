@@ -25,7 +25,7 @@ class Redis extends \Owl\Context
         $redis = $this->getService();
         $token = $this->getToken();
 
-        $this->data = $redis->hGetAll($token) ?: array();
+        $this->data = $redis->hGetAll($token) ?: [];
         $this->saved_keys = array_keys($this->data);
     }
 

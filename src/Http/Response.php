@@ -120,7 +120,7 @@ class Response implements \Psr\Http\Message\ResponseInterface
 
             foreach ($this->cookies as $cookie) {
                 list($name, $value, $expire, $path, $domain, $secure, $httponly) = $cookie;
-                setCookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+                setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
             }
         }
 

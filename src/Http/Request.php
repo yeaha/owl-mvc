@@ -1,10 +1,8 @@
 <?php
 namespace Owl\Http;
 
-use Owl\Http\Uri;
-use Owl\Http\ResourceStream;
-use Psr\Http\Message\UriInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 
 class Request implements ServerRequestInterface
 {
@@ -20,11 +18,11 @@ class Request implements ServerRequestInterface
 
     public function __construct($get = null, $post = null, $server = null, $cookies = null, $files = null)
     {
-        $this->get     = $get === null ? $_GET : $get;
-        $this->post    = $post === null ? $_POST : $post;
-        $this->server  = $server === null ? $_SERVER : $server;
+        $this->get = $get === null ? $_GET : $get;
+        $this->post = $post === null ? $_POST : $post;
+        $this->server = $server === null ? $_SERVER : $server;
         $this->cookies = $cookies === null ? $_COOKIE : $cookies;
-        $this->files   = $files === null ? $_FILES : $files;
+        $this->files = $files === null ? $_FILES : $files;
 
         $this->initialize();
     }
@@ -32,7 +30,7 @@ class Request implements ServerRequestInterface
     public function __clone()
     {
         $this->method = null;
-        $this->uri    = null;
+        $this->uri = null;
     }
 
     public function get($key = null)
@@ -102,7 +100,7 @@ class Request implements ServerRequestInterface
 
     public function withMethod($method)
     {
-        $result         = clone $this;
+        $result = clone $this;
         $result->method = strtoupper($method);
 
         return $result;
@@ -114,8 +112,8 @@ class Request implements ServerRequestInterface
             return $this->uri;
         }
 
-        $scheme   = $this->getServerParam('HTTPS') ? 'https' : 'http';
-        $user     = $this->getServerParam('PHP_AUTH_USER');
+        $scheme = $this->getServerParam('HTTPS') ? 'https' : 'http';
+        $user = $this->getServerParam('PHP_AUTH_USER');
         $password = $this->getServerParam('PHP_AUTH_PW');
 
         if ($http_host = $this->getServerParam('HTTP_HOST')) {
@@ -124,7 +122,7 @@ class Request implements ServerRequestInterface
                 $port = 0;
             } else {
                 list($host, $port) = explode(':', $http_host, 2);
-                $port              = intval($port);
+                $port = intval($port);
             }
         } else {
             $host = $this->getServerParam('SERVER_NAME') ?: $this->getServerParam('SERVER_ADDR') ?: '127.0.0.1';
@@ -222,7 +220,7 @@ class Request implements ServerRequestInterface
     public function getParsedBody()
     {
         $content_type = $this->getHeaderLine('content-type');
-        $method       = $this->getServerParam('REQUEST_METHOD');
+        $method = $this->getServerParam('REQUEST_METHOD');
 
         if ($method === 'POST' && ($content_type === 'application/x-www-form-urlencoded' || $content_type === 'multipart/form-data')) {
             return $this->post;
@@ -341,7 +339,7 @@ class Request implements ServerRequestInterface
         $headers = [];
         foreach ($this->server as $key => $value) {
             if (strpos($key, 'HTTP_') === 0) {
-                $key           = strtolower(str_replace('_', '-', substr($key, 5)));
+                $key = strtolower(str_replace('_', '-', substr($key, 5)));
                 $headers[$key] = explode(',', $value);
             }
         }
@@ -376,19 +374,19 @@ class Request implements ServerRequestInterface
     public static function factory(array $options = [])
     {
         $options = array_merge([
-            'uri'     => '/',
-            'method'  => 'GET',
+            'uri' => '/',
+            'method' => 'GET',
             'cookies' => [],
             'headers' => [],
-            'get'     => [],
-            'post'    => [],
-            'ip'      => '',
+            'get' => [],
+            'post' => [],
+            'ip' => '',
             '_SERVER' => [],
         ], $options);
 
-        $server                   = array_change_key_case($options['_SERVER'], CASE_UPPER);
+        $server = array_change_key_case($options['_SERVER'], CASE_UPPER);
         $server['REQUEST_METHOD'] = strtoupper($options['method']);
-        $server['REQUEST_URI']    = $options['uri'];
+        $server['REQUEST_URI'] = $options['uri'];
 
         if ($options['ip']) {
             $server['REMOTE_ADDR'] = $options['ip'];
@@ -400,15 +398,15 @@ class Request implements ServerRequestInterface
         }
 
         $cookies = $options['cookies'];
-        $get     = $options['get'];
-        $post    = $options['post'];
+        $get = $options['get'];
+        $post = $options['post'];
 
         if ($server['REQUEST_METHOD'] === 'GET') {
             $post = [];
         }
 
         foreach ($options['headers'] as $key => $value) {
-            $key          = 'HTTP_'.strtoupper(str_replace('-', '_', $key));
+            $key = 'HTTP_' . strtoupper(str_replace('-', '_', $key));
             $server[$key] = $value;
         }
 
@@ -422,11 +420,11 @@ class Request implements ServerRequestInterface
         foreach ($files as $key => $file) {
             if (is_array($file['name'])) {
                 foreach ($file['name'] as $i => $name) {
-                    $result[$key][$i]['name']     = $name;
-                    $result[$key][$i]['type']     = $file['type'][$i];
+                    $result[$key][$i]['name'] = $name;
+                    $result[$key][$i]['type'] = $file['type'][$i];
                     $result[$key][$i]['tmp_name'] = $file['tmp_name'][$i];
-                    $result[$key][$i]['error']    = $file['error'][$i];
-                    $result[$key][$i]['size']     = $file['size'][$i];
+                    $result[$key][$i]['error'] = $file['error'][$i];
+                    $result[$key][$i]['size'] = $file['size'][$i];
                 }
             } else {
                 $result[$key] = $file;

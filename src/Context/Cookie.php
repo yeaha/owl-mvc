@@ -41,7 +41,7 @@ class Cookie extends \Owl\Context
     public function __construct(array $config)
     {
         (new \Owl\Parameter\Validator())->execute($config, [
-            'request'  => ['type' => 'object', 'instanceof' => '\Owl\Http\Request'],
+            'request' => ['type' => 'object', 'instanceof' => '\Owl\Http\Request'],
             'response' => ['type' => 'object', 'instanceof' => '\Owl\Http\Response'],
         ]);
 
@@ -96,11 +96,11 @@ class Cookie extends \Owl\Context
     public function save()
     {
         $token = $this->getToken();
-        $data  = $this->data ? $this->encode($this->data) : '';
+        $data = $this->data ? $this->encode($this->data) : '';
         if (!$expire = (int) $this->getConfig('expire_at')) {
             $expire = ($ttl = (int) $this->getConfig('ttl')) ? (time() + $ttl) : 0;
         }
-        $path   = $this->getConfig('path') ?: '/';
+        $path = $this->getConfig('path') ?: '/';
         $domain = $this->getConfig('domain');
 
         $this->getConfig('response')->setCookie($token, $data, $expire, $path, $domain);
@@ -176,7 +176,7 @@ class Cookie extends \Owl\Context
                 break;
             }
 
-            $hash   = substr($string, $hash_length * -1);
+            $hash = substr($string, $hash_length * -1);
             $string = substr($string, 0, strlen($string) - $hash_length);
 
             if ($this->getSign($string) !== $hash) {
@@ -300,7 +300,7 @@ class Cookie extends \Owl\Context
         $iv_size = mcrypt_get_iv_size($cipher, $mode);
 
         $salt = substr(md5($salt), 0, $iv_size);
-        $iv   = mcrypt_create_iv($iv_size, $device);
+        $iv = mcrypt_create_iv($iv_size, $device);
 
         $string = $this->pad($string);
 
@@ -317,7 +317,7 @@ class Cookie extends \Owl\Context
         $iv_size = mcrypt_get_iv_size($cipher, $mode);
 
         $salt = substr(md5($salt), 0, $iv_size);
-        $iv   = substr($string, 0, $iv_size);
+        $iv = substr($string, 0, $iv_size);
 
         $string = substr($string, $iv_size);
 
@@ -351,7 +351,7 @@ class Cookie extends \Owl\Context
         list($salt, $method, $options) = $this->getOpensslConfig();
 
         $iv_length = openssl_cipher_iv_length($method);
-        $iv        = $iv_length ? random_bytes($iv_length) : '';
+        $iv = $iv_length ? random_bytes($iv_length) : '';
 
         $encrypted = openssl_encrypt($string, $method, $salt, $options, $iv);
 
@@ -364,7 +364,7 @@ class Cookie extends \Owl\Context
 
         $iv_length = openssl_cipher_iv_length($method);
 
-        $iv     = substr($string, 0, $iv_length);
+        $iv = substr($string, 0, $iv_length);
         $string = substr($string, $iv_length);
 
         return openssl_decrypt($string, $method, $salt, $options, $iv);

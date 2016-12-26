@@ -31,10 +31,10 @@ class UploadedFile implements \Psr\Http\Message\UploadedFileInterface
         }
 
         if (!$target_path = realpath($targetPath)) {
-            throw new \InvalidArgumentException('Invalid target path, '.$target_path);
+            throw new \InvalidArgumentException('Invalid target path, ' . $target_path);
         }
 
-        $target = $targetPath.'/'.($this->getClientFilename() ?: $this->file['tmp_name']);
+        $target = $targetPath . '/' . ($this->getClientFilename() ?: $this->file['tmp_name']);
         if (!move_uploaded_file($this->file['tmp_name'], $target)) {
             throw new \RuntimeException('Unable to move upload file');
         }

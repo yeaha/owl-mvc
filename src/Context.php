@@ -7,9 +7,13 @@ abstract class Context
     protected $config;
 
     abstract public function set($key, $val);
+
     abstract public function get($key = null);
+
     abstract public function has($key);
+
     abstract public function remove($key);
+
     abstract public function clear();
 
     public function __construct(array $config)
@@ -50,7 +54,7 @@ abstract class Context
             case 'cookie': return new \Owl\Context\Cookie($config);
             case 'redis': return new \Owl\Context\Redis($config);
             default:
-                throw new \UnexpectedValueException('Unknown context handler type: '.$type);
+                throw new \UnexpectedValueException('Unknown context handler type: ' . $type);
         }
     }
 }

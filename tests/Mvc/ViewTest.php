@@ -5,7 +5,7 @@ class ViewTest extends \PHPUnit_Framework_TestCase
 {
     public function test()
     {
-        $view = new \Owl\Mvc\View(TEST_DIR.'/fixture/view');
+        $view = new \Owl\Mvc\View(TEST_DIR . '/fixture/view');
 
         $output = $view->render('page');
         $output = trim($output, "\n");

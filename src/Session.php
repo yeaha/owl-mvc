@@ -7,8 +7,8 @@ class Session implements \ArrayAccess
     use \Owl\Traits\Singleton;
 
     protected $start;
-    protected $data = array();
-    protected $snapshot = array();
+    protected $data = [];
+    protected $snapshot = [];
 
     protected function __construct()
     {

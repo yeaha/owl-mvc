@@ -15,7 +15,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
         });
 
         $request = \Owl\Http\Request::factory([
-            'method' => 'FOO'
+            'method' => 'FOO',
         ]);
         $response = new \Owl\Http\Response();
 

@@ -18,7 +18,7 @@ class Request extends \Owl\Http\Request
         $files = isset($swoole_request->files) ? $swoole_request->files : [];
 
         foreach ($headers as $key => $value) {
-            $key = 'HTTP_'.strtoupper(str_replace('-', '_', $key));
+            $key = 'HTTP_' . strtoupper(str_replace('-', '_', $key));
             $server[$key] = $value;
         }
 

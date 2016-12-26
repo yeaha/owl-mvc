@@ -6,11 +6,11 @@ use Psr\Http\Message\UriInterface;
 class Uri implements UriInterface
 {
     public static $standard_port = [
-        'ftp'   => 21,
-        'ssh'   => 22,
-        'smtp'  => 25,
-        'http'  => 80,
-        'pop3'  => 110,
+        'ftp' => 21,
+        'ssh' => 22,
+        'smtp' => 25,
+        'http' => 80,
+        'pop3' => 110,
         'https' => 443,
     ];
 
@@ -26,13 +26,13 @@ class Uri implements UriInterface
     public function __construct($uri = '')
     {
         $parsed = array_merge([
-            'scheme'   => '',
-            'host'     => '',
-            'port'     => null,
-            'user'     => '',
-            'pass'     => '',
-            'path'     => '',
-            'query'    => '',
+            'scheme' => '',
+            'host' => '',
+            'port' => null,
+            'user' => '',
+            'pass' => '',
+            'path' => '',
+            'query' => '',
             'fragment' => '',
         ], parse_url($uri));
 
@@ -55,11 +55,11 @@ class Uri implements UriInterface
         }
 
         if ($user_info = $this->getUserInfo()) {
-            $authority = $user_info.'@'.$authority;
+            $authority = $user_info . '@' . $authority;
         }
 
         if ($port = $this->getPort()) {
-            $authority = $authority.':'.$port;
+            $authority = $authority . ':' . $port;
         }
 
         return $authority;
@@ -70,7 +70,7 @@ class Uri implements UriInterface
         $user_info = $this->user;
 
         if ($user_info !== '' && $this->pass) {
-            $user_info .= ':'.$this->pass;
+            $user_info .= ':' . $this->pass;
         }
 
         return $user_info;
@@ -125,7 +125,7 @@ class Uri implements UriInterface
 
     public function withScheme($scheme)
     {
-        $uri         = clone $this;
+        $uri = clone $this;
         $uri->scheme = $scheme;
 
         return $uri;
@@ -138,7 +138,7 @@ class Uri implements UriInterface
 
     public function withUserInfo($user, $password = null)
     {
-        $uri       = clone $this;
+        $uri = clone $this;
         $uri->user = $user;
         $uri->pass = $password;
 
@@ -152,7 +152,7 @@ class Uri implements UriInterface
 
     public function withHost($host)
     {
-        $uri       = clone $this;
+        $uri = clone $this;
         $uri->host = $host;
 
         return $uri;
@@ -165,7 +165,7 @@ class Uri implements UriInterface
 
     public function withPort($port)
     {
-        $uri       = clone $this;
+        $uri = clone $this;
         $uri->port = ($port === null ? null : (int) $port);
 
         return $uri;
@@ -178,7 +178,7 @@ class Uri implements UriInterface
 
     public function withPath($path)
     {
-        $uri       = clone $this;
+        $uri = clone $this;
         $uri->path = $path;
 
         return $uri;
@@ -195,7 +195,7 @@ class Uri implements UriInterface
             parse_str($query, $query);
         }
 
-        $uri        = clone $this;
+        $uri = clone $this;
         $uri->query = $query ?: [];
 
         return $uri;
@@ -205,7 +205,7 @@ class Uri implements UriInterface
     {
         $query = array_merge($this->query, $query);
 
-        $uri        = clone $this;
+        $uri = clone $this;
         $uri->query = $query;
 
         return $uri;
@@ -233,7 +233,7 @@ class Uri implements UriInterface
             }
         }
 
-        $uri        = clone $this;
+        $uri = clone $this;
         $uri->query = $query;
 
         return $uri;
@@ -245,7 +245,7 @@ class Uri implements UriInterface
             throw new \InvalidArgumentException('Invalid URI fragment');
         }
 
-        $uri           = clone $this;
+        $uri = clone $this;
         $uri->fragment = $fragment;
 
         return $uri;
@@ -261,11 +261,11 @@ class Uri implements UriInterface
         $uri = '';
 
         if ($scheme = $this->getScheme()) {
-            $uri = $scheme.':';
+            $uri = $scheme . ':';
         }
 
         if ($authority = $this->getAuthority()) {
-            $uri .= '//'.$authority;
+            $uri .= '//' . $authority;
         } else {
             $uri = '';
         }
@@ -273,12 +273,12 @@ class Uri implements UriInterface
         $uri .= $this->getPath();
 
         if ($query = $this->getQuery()) {
-            $uri .= '?'.$query;
+            $uri .= '?' . $query;
         }
 
         $fragment = $this->getFragment();
         if ($fragment !== '') {
-            $uri .= '#'.$fragment;
+            $uri .= '#' . $fragment;
         }
 
         return $uri;

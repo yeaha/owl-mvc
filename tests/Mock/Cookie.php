@@ -62,13 +62,13 @@ class Cookie
     {
         $path = trim(strtolower($path), '/');
 
-        return $path ? '/'.$path.'/' : '/';
+        return $path ? '/' . $path . '/' : '/';
     }
 
     private function normalizeDomain($domain)
     {
         $domain = trim(strtolower($domain), '.');
 
-        return $domain ? '.'.$domain.'.' : '.';
+        return $domain ? '.' . $domain . '.' : '.';
     }
 }

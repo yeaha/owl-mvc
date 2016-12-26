@@ -24,11 +24,11 @@ class View
     public function __construct($directory)
     {
         if (!realpath($directory)) {
-            throw new \Exception('View directory "'.$directory.'" not exist!');
+            throw new \Exception('View directory "' . $directory . '" not exist!');
         }
 
         $directory = realpath($directory);
-        $this->directory = rtrim($directory, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+        $this->directory = rtrim($directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
     }
 
     public function __clone()
@@ -124,15 +124,15 @@ class View
      */
     protected function includeView($view, array $vars = [], $return_content = false)
     {
-        $view_file = $this->directory.$view.'.php';
+        $view_file = $this->directory . $view . '.php';
 
         if (!$file = realpath($view_file)) {
-            throw new \Exception('View file "'.$view_file.'" not exist!');
+            throw new \Exception('View file "' . $view_file . '" not exist!');
         }
 
         // 安全性检查，视图文件必须在视图目录下
         if (strpos($file, $this->directory) !== 0) {
-            throw new \Exception('Invalid view file "'.$file.'"');
+            throw new \Exception('Invalid view file "' . $file . '"');
         }
 
         $this->included_view[$view] = true;
@@ -146,7 +146,7 @@ class View
             extract($vars);
             require $file;
         } finally {
-            while (ob_get_level() > $level+1) {
+            while (ob_get_level() > $level + 1) {
                 ob_end_clean();
             }
         }
@@ -198,9 +198,9 @@ class View
 
         if (isset($this->block_content[$block_name])) {
             if ($block_method == self::BLOCK_PREPEND) {
-                $output = $this->block_content[$block_name].$output;
+                $output = $this->block_content[$block_name] . $output;
             } elseif ($block_method == self::BLOCK_APPEND) {
-                $output = $output.$this->block_content[$block_name];
+                $output = $output . $this->block_content[$block_name];
             } else {
                 $output = $this->block_content[$block_name];
             }
@@ -300,9 +300,9 @@ class View
 
         $props = [];
         foreach ($properties as $key => $value) {
-            $props[] = $key.'="'.$value.'"';
+            $props[] = $key . '="' . $value . '"';
         }
-        $props = $props ? ' '.implode(' ', $props) : '';
+        $props = $props ? ' ' . implode(' ', $props) : '';
 
         return isset($self_close[$tag])
              ? sprintf('<%s%s/>', $tag, $props)

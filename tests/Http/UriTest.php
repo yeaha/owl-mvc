@@ -134,7 +134,7 @@ class UriTest extends \PHPUnit_Framework_TestCase
 
         $this->assertMethods($uri->addQuery(['foo' => 'bar']), [
             'getQuery' => 'a=b&c=d&foo=bar',
-            '__toString' => 'http://foo:bar@www.example.com:88/p1?a=b&c=d&foo=bar#f'
+            '__toString' => 'http://foo:bar@www.example.com:88/p1?a=b&c=d&foo=bar#f',
         ]);
 
         // test rfc 3986
@@ -143,47 +143,48 @@ class UriTest extends \PHPUnit_Framework_TestCase
         ]);
     }
 
-    public function testWithout() {
+    public function testWithout()
+    {
         $uri = new \Owl\Http\Uri('http://foo:bar@www.example.com:88/p1?a=b&c=d#f');
 
         $this->assertMethods($uri->withoutScheme(), [
             'getScheme' => '',
-            '__toString' => '//foo:bar@www.example.com:88/p1?a=b&c=d#f'
+            '__toString' => '//foo:bar@www.example.com:88/p1?a=b&c=d#f',
         ]);
 
         $this->assertMethods($uri->withoutUserInfo(), [
             'getAuthority' => 'www.example.com:88',
-            '__toString' => 'http://www.example.com:88/p1?a=b&c=d#f'
+            '__toString' => 'http://www.example.com:88/p1?a=b&c=d#f',
         ]);
 
         $this->assertMethods($uri->withoutHost(), [
             'getHost' => '',
-            '__toString' => '/p1?a=b&c=d#f'
+            '__toString' => '/p1?a=b&c=d#f',
         ]);
 
         $this->assertMethods($uri->withoutPath(), [
             'getPath' => '/',
-            '__toString' => 'http://foo:bar@www.example.com:88/?a=b&c=d#f'
+            '__toString' => 'http://foo:bar@www.example.com:88/?a=b&c=d#f',
         ]);
 
         $this->assertMethods($uri->withoutQuery(), [
             'getQuery' => '',
-            '__toString' => 'http://foo:bar@www.example.com:88/p1#f'
+            '__toString' => 'http://foo:bar@www.example.com:88/p1#f',
         ]);
 
         $this->assertMethods($uri->withoutQuery(['c']), [
             'getQuery' => 'a=b',
-            '__toString' => 'http://foo:bar@www.example.com:88/p1?a=b#f'
+            '__toString' => 'http://foo:bar@www.example.com:88/p1?a=b#f',
         ]);
 
         $this->assertMethods($uri->withoutQuery('c'), [
             'getQuery' => 'a=b',
-            '__toString' => 'http://foo:bar@www.example.com:88/p1?a=b#f'
+            '__toString' => 'http://foo:bar@www.example.com:88/p1?a=b#f',
         ]);
 
         $this->assertMethods($uri->withoutFragment(), [
             'getFragment' => '',
-            '__toString' => 'http://foo:bar@www.example.com:88/p1?a=b&c=d'
+            '__toString' => 'http://foo:bar@www.example.com:88/p1?a=b&c=d',
         ]);
     }
 
