@@ -1,7 +1,13 @@
 <?php
+declare(strict_types=1);
+
 namespace Owl\Mvc;
 
+use Owl\Http\Request;
+use Owl\Http\Response;
 use Owl\Logger;
+use Owl\Middleware;
+use Psr\Http\Message\StreamInterface;
 
 /**
  * @example
@@ -49,11 +55,11 @@ class Router
      */
     protected $children = [];
 
-    protected function __beforeRespond(\Owl\Http\Request $request, \Owl\Http\Response $response, $controller, array $paramters)
+    protected function __beforeRespond(Request $request, Response $response, string $controller, array $paramters)
     {
     }
 
-    protected function __afterRespond(\Owl\Http\Request $request, \Owl\Http\Response $response, $controller, array $paramters)
+    protected function __afterRespond(Request $request, Response $response, string $controller, array $paramters)
     {
     }
 
@@ -75,7 +81,7 @@ class Router
 
         $this->config = $config;
 
-        $this->middleware = new \Owl\Middleware();
+        $this->middleware = new Middleware();
     }
 
     /**
@@ -83,11 +89,9 @@ class Router
      *
      * @return mixed|false
      */
-    public function getConfig($key)
+    public function getConfig(string $key)
     {
-        return isset($this->config[$key])
-        ? $this->config[$key]
-        : false;
+        return $this->config[$key] ?? false;
     }
 
     /**
@@ -96,7 +100,7 @@ class Router
      *
      * @return $this
      */
-    public function setConfig($key, $value)
+    public function setConfig(string $key, $value): self
     {
         $this->config[$key] = $value;
 
@@ -111,7 +115,7 @@ class Router
      *
      * @return $this
      */
-    public function delegate($path, Router $router)
+    public function delegate(string $path, Router $router): self
     {
         $path = $this->normalizePath($path);
 
@@ -136,7 +140,7 @@ class Router
      *
      * @return $this
      */
-    public function middleware($path, $handler = null)
+    public function middleware($path, callable $handler = null): self
     {
         if ($handler === null) {
             $handler = $path;
@@ -155,7 +159,7 @@ class Router
      *
      * @return $response
      */
-    public function execute(\Owl\Http\Request $request, \Owl\Http\Response $response)
+    public function execute(Request $request, Response $response): Response
     {
         if ($router = $this->getDelegateRouter($request)) {
             return $router->execute($request, $response);
@@ -195,7 +199,7 @@ class Router
      *
      * @return $this
      */
-    public function setExceptionHandler($handler)
+    public function setExceptionHandler(callable $handler): self
     {
         $this->exception_handler = $handler;
 
@@ -211,7 +215,7 @@ class Router
      * @throws \Owl\Http\Exception 404
      * @throws \Owl\Http\Exception 501
      */
-    protected function respond(\Owl\Http\Request $request, \Owl\Http\Response $response)
+    protected function respond(Request $request, Response $response): Response
     {
         Logger::log('debug', 'router respond', [
             'url' => (string) $request->getUri(),
@@ -247,9 +251,9 @@ class Router
 
         // 如果__beforeExecute()返回了内容就直接返回内容
         if (method_exists($controller, '__beforeExecute') && ($data = call_user_func_array([$controller, '__beforeExecute'], $parameters))) {
-            if ($data instanceof \Psr\Http\Message\StreamInterface) {
+            if ($data instanceof StreamInterface) {
                 $response->withBody($data);
-            } elseif (!($data instanceof \Owl\Http\Response)) {
+            } elseif (!($data instanceof Response)) {
                 $response->write($data);
             }
 
@@ -257,9 +261,9 @@ class Router
         }
 
         $data = call_user_func_array([$controller, $method], $parameters);
-        if ($data instanceof \Psr\Http\Message\StreamInterface) {
+        if ($data instanceof StreamInterface) {
             $response->withBody($data);
-        } elseif ($data !== null && !($data instanceof \Owl\Http\Response)) {
+        } elseif ($data !== null && !($data instanceof Response)) {
             $response->write($data);
         }
 
@@ -280,7 +284,7 @@ class Router
      *
      * @return [string $class, array $parameters]
      */
-    protected function byRewrite($path, array $rules = null)
+    protected function byRewrite(string $path, array $rules = null)
     {
         if ($rules === null) {
             $rules = $this->getConfig('rewrite') ?: [];
@@ -310,7 +314,7 @@ class Router
      *
      * @return [string $class, array $parameters]
      */
-    protected function byPath($path)
+    protected function byPath(string $path): array
     {
         $pathinfo = pathinfo(strtolower($path));
 
@@ -343,7 +347,7 @@ class Router
      *
      * @return string
      */
-    protected function normalizePath($path)
+    protected function normalizePath(string $path): string
     {
         if ($path === '/') {
             return '/';
@@ -363,7 +367,7 @@ class Router
      *
      * @return string
      */
-    protected function trimBasePath($path)
+    protected function trimBasePath(string $path): string
     {
         $base_path = $this->getConfig('base_path');
 
@@ -385,7 +389,7 @@ class Router
      *
      * @return array
      */
-    protected function getMiddlewareHandlers(\Owl\Http\Request $request)
+    protected function getMiddlewareHandlers(Request $request): array
     {
         if (!$this->middleware_handlers) {
             return [];
@@ -410,7 +414,7 @@ class Router
      *
      * @return Owl\Mvc\Router | false
      */
-    protected function getDelegateRouter(\Owl\Http\Request $request)
+    protected function getDelegateRouter(Request $request)
     {
         if (!$this->children) {
             return false;
@@ -434,7 +438,7 @@ class Router
      *
      * @return string
      */
-    protected function getRequestPath(\Owl\Http\Request $request)
+    protected function getRequestPath(Request $request): string
     {
         $path = $this->normalizePath($request->getUri()->getPath());
 

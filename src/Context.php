@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Owl;
 
@@ -6,13 +7,13 @@ abstract class Context
 {
     protected $config;
 
-    abstract public function set($key, $val);
+    abstract public function set(string $key, $val);
 
-    abstract public function get($key = null);
+    abstract public function get(string $key = '');
 
-    abstract public function has($key);
+    abstract public function has(string $key): bool;
 
-    abstract public function remove($key);
+    abstract public function remove(string $key);
 
     abstract public function clear();
 
@@ -25,19 +26,19 @@ abstract class Context
         $this->config = $config;
     }
 
-    public function setConfig($key, $val)
+    public function setConfig(string $key, $val)
     {
         $this->config[$key] = $val;
     }
 
-    public function getConfig($key = null)
+    public function getConfig(string $key = '')
     {
-        return ($key === null)
+        return ($key === '')
              ? $this->config
-             : isset($this->config[$key]) ? $this->config[$key] : null;
+             : $this->config[$key] ?? null;
     }
 
-    public function getToken()
+    public function getToken(): string
     {
         return $this->getConfig('token');
     }
@@ -47,7 +48,7 @@ abstract class Context
     {
     }
 
-    public static function factory($type, array $config)
+    public static function factory($type, array $config): Context
     {
         switch (strtolower($type)) {
             case 'session': return new \Owl\Context\Session($config);

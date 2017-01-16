@@ -30,6 +30,7 @@
  *
  * $context = new \Owl\Context\Cookie($config);
  */
+declare(strict_types=1);
 
 namespace Owl\Context;
 
@@ -48,7 +49,7 @@ class Cookie extends \Owl\Context
         parent::__construct($config);
     }
 
-    public function set($key, $val)
+    public function set(string $key, $val)
     {
         $this->restore();
 
@@ -56,23 +57,23 @@ class Cookie extends \Owl\Context
         $this->save();
     }
 
-    public function get($key = null)
+    public function get(string $key = '')
     {
         $data = $this->restore();
 
-        return ($key === null)
+        return ($key === '')
              ? $data
-             : (isset($data[$key]) ? $data[$key] : null);
+             : $data[$key] ?? null;
     }
 
-    public function has($key)
+    public function has(string $key): bool
     {
         $data = $this->restore();
 
         return isset($data[$key]);
     }
 
-    public function remove($key)
+    public function remove(string $key)
     {
         $this->restore();
 
@@ -132,7 +133,7 @@ class Cookie extends \Owl\Context
 
     // 把上下文数据编码为字符串
     // return string
-    protected function encode($data)
+    protected function encode(array $data): string
     {
         $data = \Owl\safe_json_encode($data);
 
@@ -152,7 +153,7 @@ class Cookie extends \Owl\Context
 
     // 把保存为字符串的上下文数据恢复为数组
     // return array('c' => (array), 't' => (integer));
-    protected function decode($string)
+    protected function decode(string $string): array
     {
         $string = base64_decode($string, true);
         if ($string === false) {
@@ -190,7 +191,7 @@ class Cookie extends \Owl\Context
     }
 
     // 加密字符串
-    protected function encrypt($string)
+    protected function encrypt(string $string): string
     {
         return $this->getEncryptExtension() === 'mcrypt'
              ? $this->encryptWithMcrypt($string)
@@ -198,7 +199,7 @@ class Cookie extends \Owl\Context
     }
 
     // 解密字符串
-    protected function decrypt($string)
+    protected function decrypt(string $string): string
     {
         return $this->getEncryptExtension() === 'mcrypt'
              ? $this->decryptWithMcrypt($string)
@@ -206,7 +207,7 @@ class Cookie extends \Owl\Context
     }
 
     // 生成数字签名
-    protected function getSign($string)
+    protected function getSign(string $string): string
     {
         $salt = $this->getSignSalt($string);
 
@@ -214,7 +215,7 @@ class Cookie extends \Owl\Context
     }
 
     // 获得计算数字签名的salt字符串
-    protected function getSignSalt($string)
+    protected function getSignSalt(string $string): string
     {
         if (($salt = $this->getConfig('sign_salt')) === null) {
             throw new \RuntimeException('Require signature salt');
@@ -226,13 +227,13 @@ class Cookie extends \Owl\Context
 
         if ($this->getConfig('bind_ip')) {
             $ip = $this->getConfig('request')->getClientIP();
-            $salt .= long2ip(ip2long($ip) & ip2long('255.255.255.0'));     // 192.168.1.123 -> 192.168.1.0
+            $salt .= long2ip(strval(ip2long($ip) & ip2long('255.255.255.0')));     // 192.168.1.123 -> 192.168.1.0
         }
 
         return $salt;
     }
 
-    protected function getEncryptExtension()
+    protected function getEncryptExtension(): string
     {
         $extension = $this->getConfig('encrypt_extension') ?: '';
 
@@ -259,7 +260,7 @@ class Cookie extends \Owl\Context
         throw new \Exception('Require MCRYPT extension');
     }
 
-    protected function getMcryptConfig()
+    protected function getMcryptConfig(): array
     {
         $config = $this->getConfig('encrypt') ?: [];
 
@@ -293,7 +294,7 @@ class Cookie extends \Owl\Context
         return [$salt, $cipher, $mode, $device];
     }
 
-    protected function encryptWithMcrypt($string)
+    protected function encryptWithMcrypt(string $string): string
     {
         list($salt, $cipher, $mode, $device) = $this->getMcryptConfig();
 
@@ -310,7 +311,7 @@ class Cookie extends \Owl\Context
         return $iv . $encrypted;
     }
 
-    protected function decryptWithMcrypt($string)
+    protected function decryptWithMcrypt(string $string): string
     {
         list($salt, $cipher, $mode) = $this->getMcryptConfig();
 
@@ -326,7 +327,7 @@ class Cookie extends \Owl\Context
         return $this->unpad($decrypted);
     }
 
-    protected function getOpensslConfig()
+    protected function getOpensslConfig(): array
     {
         $config = $this->getConfig('encrypt') ?: [];
 
@@ -346,7 +347,7 @@ class Cookie extends \Owl\Context
         return [$salt, $method, $options];
     }
 
-    protected function encryptWithOpenssl($string)
+    protected function encryptWithOpenssl(string $string): string
     {
         list($salt, $method, $options) = $this->getOpensslConfig();
 
@@ -358,7 +359,7 @@ class Cookie extends \Owl\Context
         return $iv . $encrypted;
     }
 
-    protected function decryptWithOpenssl($string)
+    protected function decryptWithOpenssl(string $string): string
     {
         list($salt, $method, $options) = $this->getOpensslConfig();
 
@@ -371,7 +372,7 @@ class Cookie extends \Owl\Context
     }
 
     // 用PKCS7兼容字符串补全加密块
-    private function pad($string, $block = 32)
+    private function pad(string $string, int $block = 32): string
     {
         $pad = $block - (strlen($string) % $block);
 
@@ -379,7 +380,7 @@ class Cookie extends \Owl\Context
     }
 
     // 去掉填充的PKCS7兼容字符串
-    private function unpad($string, $block = 32)
+    private function unpad(string $string, int $block = 32): string
     {
         $pad = ord(substr($string, -1));
 

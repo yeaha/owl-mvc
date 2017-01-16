@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Owl\Mvc;
 
@@ -21,7 +22,7 @@ class View
     /**
      * @param string $directory View file directory
      */
-    public function __construct($directory)
+    public function __construct(string $directory)
     {
         if (!realpath($directory)) {
             throw new \Exception('View directory "' . $directory . '" not exist!');
@@ -41,7 +42,7 @@ class View
      *
      * @return $this
      */
-    public function reset()
+    public function reset(): self
     {
         $this->extend_view = null;
         $this->vars = [];
@@ -57,7 +58,7 @@ class View
      * @param string $key
      * @param mixed  $value
      */
-    public function set($key, $value)
+    public function set(string $key, $value)
     {
         $this->vars[$key] = $value;
     }
@@ -69,7 +70,7 @@ class View
      *
      * @return mixed|false
      */
-    public function get($key)
+    public function get(string $key)
     {
         return isset($this->vars[$key]) ? $this->vars[$key] : false;
     }
@@ -82,7 +83,7 @@ class View
      *
      * @return string
      */
-    public function render($view, array $vars = [])
+    public function render(string $view, array $vars = []): string
     {
         if ($vars) {
             $this->vars = array_merge($this->vars, $vars);
@@ -108,7 +109,7 @@ class View
      *
      * @param string $view
      */
-    protected function extendView($view)
+    protected function extendView(string $view)
     {
         $this->extend_view = $view;
     }
@@ -122,7 +123,7 @@ class View
      *
      * @return void|string
      */
-    protected function includeView($view, array $vars = [], $return_content = false)
+    protected function includeView(string $view, array $vars = [], $return_content = false)
     {
         $view_file = $this->directory . $view . '.php';
 
@@ -165,7 +166,7 @@ class View
      *
      * @param string $view
      */
-    protected function includeViewOnce($view)
+    protected function includeViewOnce(string $view)
     {
         if (!isset($this->included_view[$view])) {
             $this->includeView($view);
@@ -178,7 +179,7 @@ class View
      * @param string $name
      * @param string $method
      */
-    protected function beginBlock($name, $method = null)
+    protected function beginBlock(string $name, string $method = '')
     {
         $this->block_stack[] = [$name, $method ?: self::BLOCK_REPLACE];
         ob_start();
@@ -219,7 +220,7 @@ class View
      *
      * @param string
      */
-    protected function eprint($string)
+    protected function eprint(string $string)
     {
         echo htmlspecialchars($string);
     }
@@ -230,7 +231,7 @@ class View
      * @param string $name
      * @param bool   $remove Remove content after show
      */
-    protected function showBlock($name, $remove = true)
+    protected function showBlock(string $name, bool $remove = true)
     {
         if (isset($this->block_content[$name])) {
             echo $this->block_content[$name];
@@ -247,7 +248,7 @@ class View
      * @param string $file
      * @param array  $properties
      */
-    protected function loadJs($file, array $properties = [])
+    protected function loadJs(string $file, array $properties = [])
     {
         if (!isset($this->loaded_js[$file])) {
             $this->loaded_js[$file] = true;
@@ -267,7 +268,7 @@ class View
      * @param string $file
      * @param array  $properties
      */
-    protected function loadCss($file, array $properties = [])
+    protected function loadCss(string $file, array $properties = [])
     {
         if (!isset($this->loaded_css[$file])) {
             $this->loaded_css[$file] = true;
@@ -290,7 +291,7 @@ class View
      *
      * @return string
      */
-    protected function buildElement($tag, array $properties)
+    protected function buildElement(string $tag, array $properties): string
     {
         $self_close = [
             'input' => true,

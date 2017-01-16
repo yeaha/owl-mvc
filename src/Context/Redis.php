@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Owl\Context;
 
@@ -34,7 +35,7 @@ class Redis extends \Owl\Context
         $this->save();
     }
 
-    public function set($key, $val)
+    public function set(string $key, $val)
     {
         if (isset($this->data[$key]) && $this->data[$key] === $val) {
             return true;
@@ -44,21 +45,19 @@ class Redis extends \Owl\Context
         $this->dirty = true;
     }
 
-    public function get($key = null)
+    public function get(string $key = '')
     {
-        if ($key === null) {
-            return $this->data;
-        }
-
-        return isset($this->data[$key]) ? $this->data[$key] : null;
+        return ($key === '')
+             ? $this->data
+             : $this->data[$key] ?? null;
     }
 
-    public function has($key)
+    public function has(string $key): bool
     {
         return isset($this->data[$key]);
     }
 
-    public function remove($key)
+    public function remove(string $key)
     {
         if (!isset($this->data[$key])) {
             return false;
@@ -74,7 +73,7 @@ class Redis extends \Owl\Context
         $this->dirty = true;
     }
 
-    public function setTimeout($ttl)
+    public function setTimeout(int $ttl)
     {
         $redis = $this->getService();
         $token = $this->getToken();

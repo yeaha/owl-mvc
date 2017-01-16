@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Owl;
 
@@ -23,7 +24,7 @@ class Session implements \ArrayAccess
         $this->snapshot = $this->data;
     }
 
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         $this->start();
 
@@ -80,7 +81,7 @@ class Session implements \ArrayAccess
         $this->reset();
     }
 
-    public function start()
+    public function start(): bool
     {
         if ($this->start) {
             return true;
@@ -99,14 +100,14 @@ class Session implements \ArrayAccess
         return $this->start = true;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return $this->data;
     }
 
     //////////////////// static method ////////////////////
 
-    public static function initialize()
+    public static function initialize(): Session
     {
         if (!isset($GLOBALS['_SESSION']) or !($GLOBALS['_SESSION'] instanceof self)) {
             $GLOBALS['_SESSION'] = self::getInstance();

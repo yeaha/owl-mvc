@@ -1,5 +1,10 @@
 <?php
+declare(strict_types=1);
+
 namespace Owl;
+
+use Owl\Http\Request;
+use Owl\Http\Response;
 
 /**
  * @example
@@ -55,7 +60,7 @@ class Application
      *
      * @return $this
      */
-    public function middleware($handler)
+    public function middleware(callable $handler): self
     {
         $this->middleware->insert($handler);
 
@@ -77,7 +82,7 @@ class Application
      *
      * @return $this
      */
-    public function setExceptionHandler($handler)
+    public function setExceptionHandler(callable $handler): self
     {
         $this->exception_handler = $handler;
 
@@ -86,8 +91,8 @@ class Application
 
     public function start()
     {
-        $request = new \Owl\Http\Request();
-        $response = new \Owl\Http\Response();
+        $request = new Request();
+        $response = new Response();
 
         return $this->execute($request, $response);
     }
@@ -98,7 +103,7 @@ class Application
      * @param \Owl\Http\Request  $request
      * @param \Owl\Http\Response $response
      */
-    public function execute(\Owl\Http\Request $request, \Owl\Http\Response $response)
+    public function execute(Request $request, Response $response)
     {
         $exception_handler = $this->getExceptionHandler();
         $method = $request->getMethod();
@@ -123,7 +128,7 @@ class Application
         }
     }
 
-    protected function getExceptionHandler()
+    protected function getExceptionHandler(): callable
     {
         if ($this->exception_handler) {
             return $this->exception_handler;
@@ -148,7 +153,7 @@ class Application
      *
      * @return void|string
      */
-    public static function registerNamespace($namespace, $path, $classname = null)
+    public static function registerNamespace(string $namespace, string $path, $classname = null)
     {
         $namespace = trim($namespace, '\\');
         $path = rtrim($path, '/\\');

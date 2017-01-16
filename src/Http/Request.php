@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Owl\Http;
 
 use Psr\Http\Message\ServerRequestInterface;
@@ -16,7 +18,7 @@ class Request implements ServerRequestInterface
     protected $uri;
     protected $allow_client_proxy_ip = false;
 
-    public function __construct($get = null, $post = null, $server = null, $cookies = null, $files = null)
+    public function __construct(array $get = null, array $post = null, array $server = null, array $cookies = null, array $files = null)
     {
         $this->get = $get === null ? $_GET : $get;
         $this->post = $post === null ? $_POST : $post;
@@ -35,20 +37,16 @@ class Request implements ServerRequestInterface
 
     public function get($key = null)
     {
-        if ($key === null) {
-            return $this->get;
-        }
-
-        return isset($this->get[$key]) ? $this->get[$key] : null;
+        return $key === null
+             ? $this->get
+             : $this->get[$key] ?? null;
     }
 
     public function post($key = null)
     {
-        if ($key === null) {
-            return $this->post;
-        }
-
-        return isset($this->post[$key]) ? $this->post[$key] : null;
+        return $key === null
+             ? $this->post
+             : $this->post[$key] ?? null;
     }
 
     public function hasGet($key)
@@ -63,7 +61,7 @@ class Request implements ServerRequestInterface
 
     public function getRequestTarget()
     {
-        return isset($this->server['REQUEST_URI']) ? $this->server['REQUEST_URI'] : '/';
+        return $this->server['REQUEST_URI'] ?? '/';
     }
 
     public function withRequestTarget($requestTarget)
@@ -81,17 +79,13 @@ class Request implements ServerRequestInterface
             return $this->method;
         }
 
-        $method = isset($this->server['REQUEST_METHOD']) ? strtoupper($this->server['REQUEST_METHOD']) : 'GET';
+        $method = strtoupper($this->server['REQUEST_METHOD'] ?? 'GET');
         if ($method !== 'POST') {
             return $this->method = $method;
         }
 
-        $override = $this->getHeader('x-http-method-override') ?: $this->post('_method');
+        $override = $this->getHeaderLine('x-http-method-override') ?: $this->post('_method');
         if ($override) {
-            if (is_array($override)) {
-                $override = array_shift($override);
-            }
-
             $method = $override;
         }
 
@@ -155,7 +149,7 @@ class Request implements ServerRequestInterface
     {
         $name = strtoupper($name);
 
-        return isset($this->server[$name]) ? $this->server[$name] : false;
+        return $this->server[$name] ?? '';
     }
 
     public function getCookieParams()
@@ -165,7 +159,7 @@ class Request implements ServerRequestInterface
 
     public function getCookieParam($name)
     {
-        return isset($this->cookies[$name]) ? $this->cookies[$name] : false;
+        return $this->cookies[$name] ?? false;
     }
 
     public function withCookieParams(array $cookies)
@@ -327,9 +321,7 @@ class Request implements ServerRequestInterface
 
     public function isAjax()
     {
-        $val = $this->getHeader('x-requested-with');
-
-        return $val && (strtolower($val[0]) === 'xmlhttprequest');
+        return $this->getHeaderLine('x-requested-with') === 'xmlhttprequest';
     }
 
     protected function initialize()
@@ -371,7 +363,7 @@ class Request implements ServerRequestInterface
      *     ],
      * ]);
      */
-    public static function factory(array $options = [])
+    public static function factory(array $options = []): self
     {
         $options = array_merge([
             'uri' => '/',
@@ -413,7 +405,7 @@ class Request implements ServerRequestInterface
         return new self($get, $post, $server, $cookies);
     }
 
-    private static function normailizeUploadedFiles($files)
+    private static function normailizeUploadedFiles(array $files): array
     {
         $result = [];
 

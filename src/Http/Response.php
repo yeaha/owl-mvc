@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Owl\Http;
 
@@ -20,6 +21,11 @@ class Response implements \Psr\Http\Message\ResponseInterface
         $this->reset();
     }
 
+    protected function __clone()
+    {
+        throw new \Exception('Response object is not cloneable');
+    }
+
     public function reset()
     {
         $this->attributes = [];
@@ -38,7 +44,7 @@ class Response implements \Psr\Http\Message\ResponseInterface
     public function withStatus($code, $reasonPhrase = '')
     {
         $this->code = (int) $code;
-        $this->reason_phrase = $reasonPhrase;
+        $this->reason_phrase = (string) $reasonPhrase;
 
         return $this;
     }
@@ -52,12 +58,12 @@ class Response implements \Psr\Http\Message\ResponseInterface
         return \Owl\Http::getStatusPhrase($this->code);
     }
 
-    public function getCookies()
+    public function getCookies(): array
     {
         return $this->cookies;
     }
 
-    public function withCookie($name, $value, $expire = 0, $path = '/', $domain = null, $secure = null, $httponly = true)
+    public function withCookie(string $name, $value, int $expire = 0, string $path = '/', string $domain = null, bool $secure = null, bool $httponly = true): self
     {
         if ($secure === null) {
             $secure = isset($_SERVER['HTTPS']) ? (bool) $_SERVER['HTTPS'] : false;
@@ -69,20 +75,20 @@ class Response implements \Psr\Http\Message\ResponseInterface
         return $this;
     }
 
-    public function redirect($url, $status = 303)
+    public function redirect($url, int $status = 303): self
     {
         return $this->withStatus($status)
                     ->withHeader('Location', $url);
     }
 
-    public function write($data)
+    public function write($data): self
     {
         $this->getBody()->write($data);
 
         return $this;
     }
 
-    public function end($data = null)
+    public function end($data = null): self
     {
         if ($this->end) {
             return $this;

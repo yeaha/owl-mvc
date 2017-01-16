@@ -1,34 +1,35 @@
 <?php
+declare(strict_types=1);
 
 namespace Owl\Context;
 
 class Session extends \Owl\Context
 {
-    public function set($key, $val)
+    public function set(string $key, $val)
     {
         $token = $this->getToken();
 
         $_SESSION[$token][$key] = $val;
     }
 
-    public function get($key = null)
+    public function get(string $key = '')
     {
         $token = $this->getToken();
-        $context = isset($_SESSION[$token]) ? $_SESSION[$token] : [];
+        $context = $_SESSION[$token] ?? [];
 
         return ($key === null)
              ? $context
-             : (isset($context[$key]) ? $context[$key] : null);
+             : $context[$key] ?? null;
     }
 
-    public function has($key)
+    public function has(string $key): bool
     {
         $token = $this->getToken();
 
         return isset($_SESSION[$token][$key]);
     }
 
-    public function remove($key)
+    public function remove(string $key)
     {
         $token = $this->getToken();
 

@@ -1,6 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace Owl\Traits;
+
+use Owl\Context;
 
 /**
  * @example
@@ -22,22 +25,22 @@ trait Context
 {
     protected $context_handler;
 
-    public function setContext($key, $val)
+    public function setContext(string $key, $val)
     {
         return $this->getContextHandler(true)->set($key, $val);
     }
 
-    public function getContext($key = null)
+    public function getContext(string $key = '')
     {
         return $this->getContextHandler(true)->get($key);
     }
 
-    public function hasContext($key)
+    public function hasContext(string $key): bool
     {
         return $this->getContextHandler(true)->has($key);
     }
 
-    public function removeContext($key)
+    public function removeContext(string $key)
     {
         return $this->getContextHandler(true)->remove($key);
     }
@@ -52,17 +55,17 @@ trait Context
         return $this->getContextHandler(true)->save();
     }
 
-    public function setContextHandler(\Owl\Context $handler)
+    public function setContextHandler(Context $handler)
     {
         $this->context_handler = $handler;
     }
 
-    public function getContextHandler($throw_exception = false)
+    public function getContextHandler(bool $throw_exception = false)
     {
         if (!$this->context_handler && $throw_exception) {
             throw new \RuntimeException('Please set context handler before use');
         }
 
-        return $this->context_handler ?: false;
+        return $this->context_handler ?: null;
     }
 }

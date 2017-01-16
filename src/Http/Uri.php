@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Owl\Http;
 
 use Psr\Http\Message\UriInterface;
@@ -14,16 +16,16 @@ class Uri implements UriInterface
         'https' => 443,
     ];
 
-    protected $scheme;
-    protected $host;
-    protected $port;
-    protected $user;
-    protected $pass;
-    protected $path;
-    protected $query;
-    protected $fragment;
+    protected $scheme = '';
+    protected $host = '';
+    protected $port = 0;
+    protected $user = '';
+    protected $pass = '';
+    protected $path = '';
+    protected $query = [];
+    protected $fragment = '';
 
-    public function __construct($uri = '')
+    public function __construct(string $uri = '')
     {
         $parsed = array_merge([
             'scheme' => '',
@@ -69,7 +71,7 @@ class Uri implements UriInterface
     {
         $user_info = $this->user;
 
-        if ($user_info !== '' && $this->pass) {
+        if ($user_info !== '' && $this->pass !== '') {
             $user_info .= ':' . $this->pass;
         }
 
@@ -84,8 +86,8 @@ class Uri implements UriInterface
     public function getPort()
     {
         $port = $this->port;
-        if ($port === null) {
-            return;
+        if (!$port) {
+            return null;
         }
 
         $scheme = $this->getScheme();
@@ -109,13 +111,9 @@ class Uri implements UriInterface
 
     public function getQuery()
     {
-        $query = '';
-
-        if ($this->query) {
-            $query = http_build_query($this->query, '', '&', PHP_QUERY_RFC3986);
-        }
-
-        return $query;
+        return $this->query
+             ? http_build_query($this->query, '', '&', PHP_QUERY_RFC3986)
+             : '';
     }
 
     public function getFragment()
@@ -126,7 +124,7 @@ class Uri implements UriInterface
     public function withScheme($scheme)
     {
         $uri = clone $this;
-        $uri->scheme = $scheme;
+        $uri->scheme = (string) $scheme;
 
         return $uri;
     }
@@ -139,8 +137,8 @@ class Uri implements UriInterface
     public function withUserInfo($user, $password = null)
     {
         $uri = clone $this;
-        $uri->user = $user;
-        $uri->pass = $password;
+        $uri->user = (string) $user;
+        $uri->pass = (string) $password;
 
         return $uri;
     }
@@ -153,7 +151,7 @@ class Uri implements UriInterface
     public function withHost($host)
     {
         $uri = clone $this;
-        $uri->host = $host;
+        $uri->host = (string) $host;
 
         return $uri;
     }
@@ -166,7 +164,7 @@ class Uri implements UriInterface
     public function withPort($port)
     {
         $uri = clone $this;
-        $uri->port = ($port === null ? null : (int) $port);
+        $uri->port = (int) $port;
 
         return $uri;
     }
@@ -179,7 +177,7 @@ class Uri implements UriInterface
     public function withPath($path)
     {
         $uri = clone $this;
-        $uri->path = $path;
+        $uri->path = (string) $path;
 
         return $uri;
     }
@@ -241,12 +239,8 @@ class Uri implements UriInterface
 
     public function withFragment($fragment)
     {
-        if (!is_string($fragment)) {
-            throw new \InvalidArgumentException('Invalid URI fragment');
-        }
-
         $uri = clone $this;
-        $uri->fragment = $fragment;
+        $uri->fragment = (string) $fragment;
 
         return $uri;
     }
