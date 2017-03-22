@@ -183,7 +183,18 @@ class Cookie extends \Owl\Context
                 break;
             }
 
-            return \Owl\safe_json_decode($string, true) ?: [];
+            try {
+                return \Owl\safe_json_decode($string, true) ?: [];
+            } catch (\Exception $exception) {
+                if (DEBUG) {
+                    throw $exception;
+                }
+
+                \Owl\Logger::log('error', 'cookie context json decode failed', [
+                    'message' => $exception->getMessage(),
+                    'code' => $exception->getCode(),
+                ]);
+            }
         } while (false);
 
         return [];
