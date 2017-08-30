@@ -40,17 +40,30 @@ class Redis extends \Owl\Context
             return true;
         }
 
-        $this->data[$key] = $val;
+        $this->data[$key] = is_array($val) ? json_encode($val) : $val;
         $this->dirty = true;
     }
 
     public function get($key = null)
     {
         if ($key === null) {
-            return $this->data;
+            return array_map(function ($item) {
+                $array_value = json_decode($item, true);
+                if (0 != json_last_error()) {
+                    return $item;
+                }
+
+                return $array_value;
+            }, $this->data);
         }
 
-        return isset($this->data[$key]) ? $this->data[$key] : null;
+        $value = isset($this->data[$key]) ? $this->data[$key] : null;
+        $array_value = json_decode($value, true);
+        if (0 != json_last_error()) {
+            return $value;
+        }
+
+        return $array_value;
     }
 
     public function has($key)
