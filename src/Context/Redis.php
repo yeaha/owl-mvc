@@ -47,7 +47,14 @@ class Redis extends \Owl\Context
     public function get($key = null)
     {
         if ($key === null) {
-            return $this->data;
+            return array_map(function ($item) {
+                $array_value = json_decode($item, true);
+                if (0 != json_last_error()) {
+                    return $item;
+                }
+
+                return $array_value;
+            }, $this->data);
         }
 
         $value = isset($this->data[$key]) ? $this->data[$key] : null;
