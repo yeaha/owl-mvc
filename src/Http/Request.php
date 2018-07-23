@@ -1,4 +1,5 @@
 <?php
+
 namespace Owl\Http;
 
 use Psr\Http\Message\ServerRequestInterface;
@@ -18,11 +19,11 @@ class Request implements ServerRequestInterface
 
     public function __construct($get = null, $post = null, $server = null, $cookies = null, $files = null)
     {
-        $this->get = $get === null ? $_GET : $get;
-        $this->post = $post === null ? $_POST : $post;
-        $this->server = $server === null ? $_SERVER : $server;
-        $this->cookies = $cookies === null ? $_COOKIE : $cookies;
-        $this->files = $files === null ? $_FILES : $files;
+        $this->get = null === $get ? $_GET : $get;
+        $this->post = null === $post ? $_POST : $post;
+        $this->server = null === $server ? $_SERVER : $server;
+        $this->cookies = null === $cookies ? $_COOKIE : $cookies;
+        $this->files = null === $files ? $_FILES : $files;
 
         $this->initialize();
     }
@@ -35,7 +36,7 @@ class Request implements ServerRequestInterface
 
     public function get($key = null)
     {
-        if ($key === null) {
+        if (null === $key) {
             return $this->get;
         }
 
@@ -44,7 +45,7 @@ class Request implements ServerRequestInterface
 
     public function post($key = null)
     {
-        if ($key === null) {
+        if (null === $key) {
             return $this->post;
         }
 
@@ -77,12 +78,12 @@ class Request implements ServerRequestInterface
 
     public function getMethod()
     {
-        if ($this->method !== null) {
+        if (null !== $this->method) {
             return $this->method;
         }
 
         $method = isset($this->server['REQUEST_METHOD']) ? strtoupper($this->server['REQUEST_METHOD']) : 'GET';
-        if ($method !== 'POST') {
+        if ('POST' !== $method) {
             return $this->method = $method;
         }
 
@@ -117,7 +118,7 @@ class Request implements ServerRequestInterface
         $password = $this->getServerParam('PHP_AUTH_PW');
 
         if ($http_host = $this->getServerParam('HTTP_HOST')) {
-            if (strpos($http_host, ':') === false) {
+            if (false === strpos($http_host, ':')) {
                 $host = $http_host;
                 $port = 0;
             } else {
@@ -200,7 +201,7 @@ class Request implements ServerRequestInterface
                 $files[$key] = new UploadedFile($file);
             } else {
                 foreach ($file as $f) {
-                    if ($f['name'] === '') {
+                    if ('' === $f['name']) {
                         continue;
                     }
 
@@ -222,17 +223,17 @@ class Request implements ServerRequestInterface
         $content_type = $this->getHeaderLine('content-type');
         $method = $this->getServerParam('REQUEST_METHOD');
 
-        if ($method === 'POST' && ($content_type === 'application/x-www-form-urlencoded' || $content_type === 'multipart/form-data')) {
+        if ('POST' === $method && ('application/x-www-form-urlencoded' === $content_type || 'multipart/form-data' === $content_type)) {
             return $this->post;
         }
 
         $body = (string) $this->body;
 
-        if ($body === '') {
+        if ('' === $body) {
             return;
         }
 
-        if ($content_type === 'application/json') {
+        if ('application/json' === $content_type) {
             return \Owl\safe_json_decode($body, true);
         }
 
@@ -260,7 +261,7 @@ class Request implements ServerRequestInterface
             return $this->getServerParam('remote_addr');
         }
 
-        if (strpos($ip, ',') === false) {
+        if (false === strpos($ip, ',')) {
             return $ip;
         }
 
@@ -282,7 +283,7 @@ class Request implements ServerRequestInterface
         foreach ($ip_set as $key => $ip) {
             $long = ip2long($ip);
 
-            if ($long === false) {
+            if (false === $long) {
                 unset($ip_set[$key]);
                 continue;
             }
@@ -307,29 +308,29 @@ class Request implements ServerRequestInterface
 
     public function isGet()
     {
-        return $this->getMethod() === 'GET' || $this->getMethod() === 'HEAD';
+        return 'GET' === $this->getMethod() || 'HEAD' === $this->getMethod();
     }
 
     public function isPost()
     {
-        return $this->getMethod() === 'POST';
+        return 'POST' === $this->getMethod();
     }
 
     public function isPut()
     {
-        return $this->getMethod() === 'PUT';
+        return 'PUT' === $this->getMethod();
     }
 
     public function isDelete()
     {
-        return $this->getMethod() === 'DELETE';
+        return 'DELETE' === $this->getMethod();
     }
 
     public function isAjax()
     {
         $val = $this->getHeader('x-requested-with');
 
-        return $val && (strtolower($val[0]) === 'xmlhttprequest');
+        return $val && ('xmlhttprequest' === strtolower($val[0]));
     }
 
     protected function initialize()
@@ -338,7 +339,7 @@ class Request implements ServerRequestInterface
 
         $headers = [];
         foreach ($this->server as $key => $value) {
-            if (strpos($key, 'HTTP_') === 0) {
+            if (0 === strpos($key, 'HTTP_')) {
                 $key = strtolower(str_replace('_', '-', substr($key, 5)));
                 $headers[$key] = explode(',', $value);
             }
@@ -401,7 +402,7 @@ class Request implements ServerRequestInterface
         $get = $options['get'];
         $post = $options['post'];
 
-        if ($server['REQUEST_METHOD'] === 'GET') {
+        if ('GET' === $server['REQUEST_METHOD']) {
             $post = [];
         }
 
@@ -487,7 +488,7 @@ class Request implements ServerRequestInterface
      */
     public function getServer($key = null)
     {
-        if ($key === null) {
+        if (null === $key) {
             return $this->getServerParams();
         }
 
