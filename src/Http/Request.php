@@ -223,7 +223,7 @@ class Request implements ServerRequestInterface
         $content_type = $this->getHeaderLine('content-type');
         $method = $this->getServerParam('REQUEST_METHOD');
 
-        if ('POST' === $method && ('application/x-www-form-urlencoded' === $content_type || 'multipart/form-data' === $content_type)) {
+        if ('POST' === $method && (false !== \strpos($content_type, 'application/x-www-form-urlencoded') || false !== \strpos($content_type, 'multipart/form-data'))) {
             return $this->post;
         }
 
@@ -233,7 +233,7 @@ class Request implements ServerRequestInterface
             return;
         }
 
-        if ('application/json' === $content_type) {
+        if (false !== \strpos($content_type, 'application/json')) {
             return \Owl\safe_json_decode($body, true);
         }
 
