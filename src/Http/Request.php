@@ -34,6 +34,11 @@ class Request implements ServerRequestInterface
         $this->uri = null;
     }
 
+    /**
+     * @param string $key
+     *
+     * @return mixed | array
+     */
     public function get($key = null)
     {
         if (null === $key) {
@@ -43,6 +48,11 @@ class Request implements ServerRequestInterface
         return isset($this->get[$key]) ? $this->get[$key] : null;
     }
 
+    /**
+     * @param string $key
+     *
+     * @return mixed | array
+     */
     public function post($key = null)
     {
         if (null === $key) {
@@ -52,21 +62,41 @@ class Request implements ServerRequestInterface
         return isset($this->post[$key]) ? $this->post[$key] : null;
     }
 
+    /**
+     * @param string $key
+     *
+     * @return bool
+     */
     public function hasGet($key)
     {
         return array_key_exists($key, $this->get);
     }
 
+    /**
+     * @param string $key
+     *
+     * @return bool
+     */
     public function hasPost($key)
     {
         return array_key_exists($key, $this->post);
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return string
+     */
     public function getRequestTarget()
     {
         return isset($this->server['REQUEST_URI']) ? $this->server['REQUEST_URI'] : '/';
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return self
+     */
     public function withRequestTarget($requestTarget)
     {
         $result = clone $this;
@@ -76,6 +106,11 @@ class Request implements ServerRequestInterface
         return $result;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return string
+     */
     public function getMethod()
     {
         if (null !== $this->method) {
@@ -99,6 +134,13 @@ class Request implements ServerRequestInterface
         return $this->method = strtoupper($method);
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $method
+     *
+     * @return self
+     */
     public function withMethod($method)
     {
         $result = clone $this;
@@ -107,6 +149,11 @@ class Request implements ServerRequestInterface
         return $result;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return \Owl\Http\Uri
+     */
     public function getUri()
     {
         if ($this->uri) {
@@ -142,16 +189,34 @@ class Request implements ServerRequestInterface
         return $uri;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param \Psr\Http\Message\UriInterface $uri
+     * @param bool                           $preserveHost
+     */
     public function withUri(UriInterface $uri, $preserveHost = false)
     {
         throw new \Exception('Request::withUri() not implemented');
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return array
+     */
     public function getServerParams()
     {
         return $this->server;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $name
+     *
+     * @return mixed | false
+     */
     public function getServerParam($name)
     {
         $name = strtoupper($name);
@@ -159,16 +224,35 @@ class Request implements ServerRequestInterface
         return isset($this->server[$name]) ? $this->server[$name] : false;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return array
+     */
     public function getCookieParams()
     {
         return $this->cookies;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $name
+     *
+     * @return mixed | false
+     */
     public function getCookieParam($name)
     {
         return isset($this->cookies[$name]) ? $this->cookies[$name] : false;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param array $cookies
+     *
+     * @return self
+     */
     public function withCookieParams(array $cookies)
     {
         $result = clone $this;
@@ -178,11 +262,23 @@ class Request implements ServerRequestInterface
         return $result;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return array
+     */
     public function getQueryParams()
     {
         return $this->get;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param array $query
+     *
+     * @return self
+     */
     public function withQueryParams(array $query)
     {
         $result = clone $this;
@@ -192,6 +288,11 @@ class Request implements ServerRequestInterface
         return $result;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return array
+     */
     public function getUploadedFiles()
     {
         $files = [];
@@ -213,11 +314,21 @@ class Request implements ServerRequestInterface
         return $files;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param array $uploadFiles
+     */
     public function withUploadedFiles(array $uploadFiles)
     {
         throw new \Exception('Request::withUploadedFiles() not implemented');
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return string | array
+     */
     public function getParsedBody()
     {
         $content_type = $this->getHeaderLine('content-type');
@@ -240,6 +351,11 @@ class Request implements ServerRequestInterface
         return $body;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param mixed $data
+     */
     public function withParsedBody($data)
     {
         throw new \Exception('Request::withParsedBody() not implemented');
@@ -255,6 +371,9 @@ class Request implements ServerRequestInterface
         $this->allow_client_proxy_ip = false;
     }
 
+    /**
+     * @return string
+     */
     public function getClientIP()
     {
         if (!$this->allow_client_proxy_ip || !($ip = $this->getServerParam('http_x_forwarded_for'))) {
@@ -306,26 +425,41 @@ class Request implements ServerRequestInterface
         return array_shift($ip_set) ?: '0.0.0.0';
     }
 
+    /**
+     * @return bool
+     */
     public function isGet()
     {
         return 'GET' === $this->getMethod() || 'HEAD' === $this->getMethod();
     }
 
+    /**
+     * @return bool
+     */
     public function isPost()
     {
         return 'POST' === $this->getMethod();
     }
 
+    /**
+     * @return bool
+     */
     public function isPut()
     {
         return 'PUT' === $this->getMethod();
     }
 
+    /**
+     * @return bool
+     */
     public function isDelete()
     {
         return 'DELETE' === $this->getMethod();
     }
 
+    /**
+     * @return bool
+     */
     public function isAjax()
     {
         $val = $this->getHeader('x-requested-with');

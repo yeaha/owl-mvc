@@ -30,11 +30,24 @@ class Response implements \Psr\Http\Message\ResponseInterface
         $this->end = false;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return int
+     */
     public function getStatusCode()
     {
         return $this->code;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param int    $code
+     * @param string $reasonPhrase
+     *
+     * @return self
+     */
     public function withStatus($code, $reasonPhrase = '')
     {
         $this->code = (int) $code;
@@ -43,6 +56,11 @@ class Response implements \Psr\Http\Message\ResponseInterface
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return string
+     */
     public function getReasonPhrase()
     {
         if ($this->reason_phrase) {
@@ -52,14 +70,28 @@ class Response implements \Psr\Http\Message\ResponseInterface
         return \Owl\Http::getStatusPhrase($this->code);
     }
 
+    /**
+     * @return array
+     */
     public function getCookies()
     {
         return $this->cookies;
     }
 
+    /**
+     * @param string $name
+     * @param mixed  $value
+     * @param int    $expire
+     * @param string $path
+     * @param string $domain
+     * @param bool   $secure
+     * @param bool   $httponly
+     *
+     * @return self
+     */
     public function withCookie($name, $value, $expire = 0, $path = '/', $domain = null, $secure = null, $httponly = true)
     {
-        if ($secure === null) {
+        if (null === $secure) {
             $secure = isset($_SERVER['HTTPS']) ? (bool) $_SERVER['HTTPS'] : false;
         }
 
@@ -69,12 +101,23 @@ class Response implements \Psr\Http\Message\ResponseInterface
         return $this;
     }
 
+    /**
+     * @param \Owl\Http\Uri | string $url
+     * @param int                    $status
+     *
+     * @return self
+     */
     public function redirect($url, $status = 303)
     {
         return $this->withStatus($status)
                     ->withHeader('Location', $url);
     }
 
+    /**
+     * @param string $data
+     *
+     * @return self
+     */
     public function write($data)
     {
         $this->getBody()->write($data);
@@ -82,6 +125,11 @@ class Response implements \Psr\Http\Message\ResponseInterface
         return $this;
     }
 
+    /**
+     * @param string $data
+     *
+     * @return self
+     */
     public function end($data = null)
     {
         if ($this->end) {
@@ -90,7 +138,7 @@ class Response implements \Psr\Http\Message\ResponseInterface
 
         $this->end = true;
 
-        if ($data !== null) {
+        if (null !== $data) {
             $this->write($data);
         }
 
@@ -105,7 +153,7 @@ class Response implements \Psr\Http\Message\ResponseInterface
         if (!headers_sent()) {
             $version = $this->getProtocolVersion();
 
-            if ($code !== 200 || $version !== '1.1') {
+            if (200 !== $code || '1.1' !== $version) {
                 header(sprintf('HTTP/%s %d %s', $version, $code, $this->getReasonPhrase()));
             }
 
@@ -125,7 +173,7 @@ class Response implements \Psr\Http\Message\ResponseInterface
         }
 
         $body = $this->getBody();
-        if ($code === 204 || $code === 304) {
+        if (204 === $code || 304 === $code) {
             echo '';
         } elseif ($body instanceof \Owl\Http\IteratorStream) {
             foreach ($body->iterator() as $string) {
