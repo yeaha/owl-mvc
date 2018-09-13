@@ -91,8 +91,10 @@ class Session implements \ArrayAccess
         }
 
         @session_start();
-        $this->data = $_SESSION;
-        $this->snapshot = $_SESSION;
+        $this->data = $_SESSION instanceof self
+                    ? $_SESSION->toArray()
+                    : $_SESSION;
+        $this->snapshot = $this->data;
 
         $_SESSION = $this;
 
