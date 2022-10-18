@@ -48,7 +48,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(['\Controller\Foo\Bar', []], $router->testDispatch('/foobar/foo/bar'));
         $this->assertSame(['\Controller\Baz', []], $router->testDispatch('/foobar/baz'));
 
-        $this->setExpectedException('\Owl\Http\Exception', '', 404);
+        $this->expectException('\Owl\Http\Exception');
         $router->testDispatch('/baz');
     }
 

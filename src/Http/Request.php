@@ -9,6 +9,9 @@ class Request implements ServerRequestInterface
 {
     use \Owl\Http\MessageTrait;
 
+    /** @var callable */
+    private $client_ip_extractor = null;
+
     protected $get;
     protected $post;
     protected $cookies;
@@ -372,10 +375,24 @@ class Request implements ServerRequestInterface
     }
 
     /**
+     * @param callable $func
+     *
+     * @return void
+     */
+    public function setClientIpExtractor($func)
+    {
+        $this->client_ip_extractor = $func;
+    }
+
+    /**
      * @return string
      */
     public function getClientIP()
     {
+        if ($this->client_ip_extractor) {
+            return call_user_func($this->client_ip_extractor, $this, $this->allow_client_proxy_ip);
+        }
+
         if (!$this->allow_client_proxy_ip || !($ip = $this->getServerParam('http_x_forwarded_for'))) {
             return $this->getServerParam('remote_addr');
         }
